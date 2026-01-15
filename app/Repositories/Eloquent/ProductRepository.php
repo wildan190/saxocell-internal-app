@@ -5,6 +5,7 @@ namespace App\Repositories\Eloquent;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Repositories\Contracts\ProductRepositoryInterface;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -12,39 +13,45 @@ class ProductRepository implements ProductRepositoryInterface
 {
     public function getAll(array $filters = [], int $perPage = 10)
     {
-        $query = Product::query();
+        $cacheKey = 'products:all:' . md5(json_encode($filters) . $perPage . request('page', 1));
 
-        if (isset($filters['search']) && $filters['search']) {
-            $search = $filters['search'];
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%");
-            });
-        }
+        return Cache::tags(['products'])->remember($cacheKey, 3600, function () use ($filters, $perPage) {
+            $query = Product::query();
 
-        if (isset($filters['category']) && $filters['category']) {
-            $query->where('category', $filters['category']);
-        }
+            if (isset($filters['search']) && $filters['search']) {
+                $search = $filters['search'];
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%");
+                });
+            }
 
-        if (isset($filters['status']) && $filters['status']) {
-            $query->where('status', $filters['status']);
-        }
+            if (isset($filters['category']) && $filters['category']) {
+                $query->where('category', $filters['category']);
+            }
 
-        if (isset($filters['min_price']) && $filters['min_price']) {
-            $query->where('price', '>=', $filters['min_price']);
-        }
+            if (isset($filters['status']) && $filters['status']) {
+                $query->where('status', $filters['status']);
+            }
 
-        if (isset($filters['max_price']) && $filters['max_price']) {
-            $query->where('price', '<=', $filters['max_price']);
-        }
+            if (isset($filters['min_price']) && $filters['min_price']) {
+                $query->where('price', '>=', $filters['min_price']);
+            }
 
-        return $query->latest()->paginate($perPage)->withQueryString();
+            if (isset($filters['max_price']) && $filters['max_price']) {
+                $query->where('price', '<=', $filters['max_price']);
+            }
+
+            return $query->latest()->paginate($perPage)->withQueryString();
+        });
     }
 
     public function findById($id)
     {
-        return Product::findOrFail($id);
+        return Cache::tags(['products'])->remember("products:show:{$id}", 3600, function () use ($id) {
+            return Product::findOrFail($id);
+        });
     }
 
     public function create(array $data)
@@ -58,6 +65,8 @@ class ProductRepository implements ProductRepositoryInterface
         }
 
         $product = Product::create($data);
+
+        Cache::tags(['products'])->flush();
 
         // Generate SKU
         if (!$product->sku) {
@@ -89,6 +98,8 @@ class ProductRepository implements ProductRepositoryInterface
 
         $product->update($data);
 
+        Cache::tags(['products'])->flush();
+
         // Handle variants
         if (isset($data['has_variants']) && $data['has_variants'] && isset($data['variants'])) {
             $this->updateVariants($product, $data['variants']);
@@ -107,7 +118,9 @@ class ProductRepository implements ProductRepositoryInterface
             Storage::disk('public')->delete($product->image);
         }
 
-        return $product->delete();
+        $deleted = $product->delete();
+        Cache::tags(['products'])->flush();
+        return $deleted;
     }
 
     private function formatSpecs(array $data)

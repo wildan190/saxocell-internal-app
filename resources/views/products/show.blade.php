@@ -28,7 +28,7 @@
             </div>
 
             <div class="product-price">
-                <span class="price-amount">${{ number_format($product->price, 2) }}</span>
+                <span class="price-amount">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
             </div>
 
             @if($product->description)
@@ -97,9 +97,9 @@
                         <div class="summary-label">Price Range</div>
                         <div class="summary-value">
                             @if($product->price_range)
-                                ${{ number_format($product->price_range['min'], 2) }} - ${{ number_format($product->price_range['max'], 2) }}
+                                Rp {{ number_format($product->price_range['min'], 0, ',', '.') }} - Rp {{ number_format($product->price_range['max'], 0, ',', '.') }}
                             @else
-                                ${{ number_format($product->effective_price, 2) }}
+                                Rp {{ number_format($product->effective_price, 0, ',', '.') }}
                             @endif
                         </div>
                     </div>
@@ -120,15 +120,15 @@
 
                         <div class="variant-info">
                             <h4 class="variant-name">{{ $variant->name }}</h4>
-                            @if($variant->formatted_attributes)
-                                <div class="variant-attributes">{{ $variant->formatted_attributes }}</div>
+                            @if($variant->attributes_summary)
+                                <div class="variant-attributes">{{ $variant->attributes_summary }}</div>
                             @endif
                             <div class="variant-details">
                                 <div class="variant-price">
                                     @if($variant->price)
-                                        ${{ number_format($variant->price, 2) }}
+                                        Rp {{ number_format($variant->price, 0, ',', '.') }}
                                     @else
-                                        ${{ number_format($product->price, 2) }}
+                                        Rp {{ number_format($product->price, 0, ',', '.') }}
                                     @endif
                                 </div>
                                 <div class="variant-stock">
@@ -164,7 +164,7 @@
                 </div>
                 <div class="summary-item">
                     <div class="summary-label">Price</div>
-                    <div class="summary-value">${{ number_format($product->price, 2) }}</div>
+                    <div class="summary-value">Rp {{ number_format($product->price, 0, ',', '.') }}</div>
                 </div>
             </div>
         @endif

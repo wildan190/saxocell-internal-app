@@ -41,3 +41,26 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
 });
+
+// Procurement - Purchase Orders
+Route::middleware(['auth'])->group(function () {
+    Route::get('/procurement/purchase-orders', [\App\Http\Controllers\PurchaseOrderController::class, 'index'])->name('purchase-orders.index');
+    Route::get('/procurement/purchase-orders/create', [\App\Http\Controllers\PurchaseOrderController::class, 'create'])->name('purchase-orders.create');
+    Route::post('/procurement/purchase-orders', [\App\Http\Controllers\PurchaseOrderController::class, 'store'])->name('purchase-orders.store');
+    Route::get('/procurement/purchase-orders/{id}', [\App\Http\Controllers\PurchaseOrderController::class, 'show'])->name('purchase-orders.show');
+    Route::post('/procurement/purchase-orders/{id}/approve', [\App\Http\Controllers\PurchaseOrderController::class, 'approve'])->name('purchase-orders.approve');
+    Route::delete('/procurement/purchase-orders/{id}', [\App\Http\Controllers\PurchaseOrderController::class, 'destroy'])->name('purchase-orders.destroy');
+    
+    // Procurement - Delivery Orders (Goods Receipt)
+    Route::get('/procurement/delivery-orders', [\App\Http\Controllers\DeliveryOrderController::class, 'index'])->name('delivery-orders.index');
+    Route::get('/procurement/delivery-orders/create', [\App\Http\Controllers\DeliveryOrderController::class, 'create'])->name('delivery-orders.create');
+    Route::post('/procurement/delivery-orders', [\App\Http\Controllers\DeliveryOrderController::class, 'store'])->name('delivery-orders.store');
+    Route::get('/procurement/delivery-orders/{id}', [\App\Http\Controllers\DeliveryOrderController::class, 'show'])->name('delivery-orders.show');
+    
+    // Procurement - Invoices & Matching
+    Route::get('/procurement/invoices', [\App\Http\Controllers\InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/procurement/invoices/create', [\App\Http\Controllers\InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('/procurement/invoices', [\App\Http\Controllers\InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('/procurement/invoices/{id}', [\App\Http\Controllers\InvoiceController::class, 'show'])->name('invoices.show');
+});
+

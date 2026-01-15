@@ -5,25 +5,30 @@ namespace App\Repositories\Eloquent;
 use App\Models\InventoryTransaction;
 use App\Models\Product;
 use App\Repositories\Contracts\InventoryRepositoryInterface;
+use Illuminate\Support\Facades\Cache;
 
 class InventoryRepository implements InventoryRepositoryInterface
 {
     public function getAll(array $filters = [])
     {
-        $query = InventoryTransaction::with(['product', 'productVariant', 'supplier'])
-            ->latest();
+        $cacheKey = 'inventory:all:' . md5(json_encode($filters) . request('page', 1));
 
-        // Filter by type
-        if (!empty($filters['type'])) {
-            $query->where('type', $filters['type']);
-        }
+        return Cache::tags(['inventory'])->remember($cacheKey, 3600, function () use ($filters) {
+            $query = InventoryTransaction::with(['product', 'productVariant', 'supplier'])
+                ->latest();
 
-        // Filter by product
-        if (!empty($filters['product_id'])) {
-            $query->where('product_id', $filters['product_id']);
-        }
+            // Filter by type
+            if (!empty($filters['type'])) {
+                $query->where('type', $filters['type']);
+            }
 
-        return $query->paginate(20);
+            // Filter by product
+            if (!empty($filters['product_id'])) {
+                $query->where('product_id', $filters['product_id']);
+            }
+
+            return $query->paginate(20);
+        });
     }
 
     public function create(array $data)
@@ -32,6 +37,8 @@ class InventoryRepository implements InventoryRepositoryInterface
         
         // Update stock based on transaction type
         $this->updateStock($transaction);
+        
+        Cache::tags(['inventory', 'products'])->flush();
         
         return $transaction;
     }

@@ -113,12 +113,15 @@ class Product extends Model
         $baseSku = $this->generateSku();
         $attributes = $variant->getAttribute('attributes') ?? [];
 
-        // Create suffix from attributes (e.g., RED-LG, BLU-SM)
-        $suffix = collect($attributes)
-            ->map(fn($value) => strtoupper(substr($value, 0, 3)))
-            ->join('-');
+        // Create suffix from attributes using hash to guarantee uniqueness
+        $attrString = collect($attributes)
+            ->map(fn($v, $k) => "$k:$v")
+            ->sort()
+            ->join('|');
+            
+        $hash = substr(strtoupper(md5($attrString)), 0, 6);
 
-        return $baseSku . '-' . $suffix;
+        return $baseSku . '-' . $hash;
     }
 
     /**

@@ -19,6 +19,10 @@ class ProductVariant extends Model
         'status',
     ];
 
+    protected $appends = [
+        'formatted_attributes'
+    ];
+
     protected $casts = [
         'attributes' => 'array',
         'price' => 'decimal:2',
@@ -58,18 +62,34 @@ class ProductVariant extends Model
     }
 
     /**
-     * Get formatted attributes for display.
+     * Get formatted attributes as an array for iteration.
      */
-    public function getFormattedAttributesAttribute(): string
+    public function getFormattedAttributesAttribute(): array
     {
         $attributes = $this->getAttribute('attributes');
 
         if (!$attributes) {
-            return '';
+            return [];
         }
 
         return collect($attributes)
-            ->map(fn($value, $key) => ucfirst($key) . ': ' . $value)
+            ->mapWithKeys(fn($value, $key) => [ucfirst($key) => $value])
+            ->toArray();
+    }
+
+    /**
+     * Get attributes as a joined string for simple display.
+     */
+    public function getAttributesSummaryAttribute(): string
+    {
+        $formatted = $this->formatted_attributes;
+
+        if (empty($formatted)) {
+            return '';
+        }
+
+        return collect($formatted)
+            ->map(fn($value, $key) => "$key: $value")
             ->join(', ');
     }
 

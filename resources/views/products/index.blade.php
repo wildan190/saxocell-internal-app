@@ -71,9 +71,9 @@
             <div class="product-meta">
                 <span class="product-price">
                     @if($product->hasVariants() && $product->price_range)
-                        ${{ number_format($product->price_range['min'], 2) }} - ${{ number_format($product->price_range['max'], 2) }}
+                        Rp {{ number_format($product->price_range['min'], 0, ',', '.') }} - Rp {{ number_format($product->price_range['max'], 0, ',', '.') }}
                     @else
-                        ${{ number_format($product->effective_price, 2) }}
+                        Rp {{ number_format($product->effective_price, 0, ',', '.') }}
                     @endif
                 </span>
                 <span class="product-category {{ $product->category }}">{{ ucfirst($product->category) }}</span>
@@ -122,9 +122,7 @@
     @endforeach
 </div>
 
-<div class="pagination-wrapper">
-    {{ $products->links() }}
-</div>
+{{ $products->links() }}
 @else
 <div class="empty-state">
     <div class="empty-icon">
@@ -341,11 +339,6 @@
         display: inline;
     }
 
-    .pagination-wrapper {
-        display: flex;
-        justify-content: center;
-        margin-top: 2rem;
-    }
 
     .empty-state {
         text-align: center;

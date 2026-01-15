@@ -25,6 +25,80 @@ class DatabaseSeeder extends Seeder
 
         // Create smartphone products with variants
         $this->createSmartphoneProducts();
+
+        // Seed Procurement Module
+        $this->seedProcurement();
+    }
+
+    /**
+     * Seed the Procurement module using factories.
+     */
+    private function seedProcurement(): void
+    {
+        // 1. Create Suppliers
+        $suppliers = \App\Models\Supplier::factory()->count(10)->create();
+
+        // 2. Create Purchase Orders with Items
+        $pos = \App\Models\PurchaseOrder::factory()
+            ->count(15)
+            ->sequence(fn ($sequence) => ['supplier_id' => $suppliers->random()->id])
+            ->has(\App\Models\PurchaseOrderItem::factory()->count(3), 'items')
+            ->create();
+
+        // 3. Update PO totals (factory doesn't update parent PO subtotal/total automatically by default)
+        foreach ($pos as $po) {
+            $subtotal = $po->items->sum('subtotal');
+            $taxAmount = $subtotal * 0.11;
+            $po->update([
+                'subtotal' => $subtotal,
+                'tax_amount' => $taxAmount,
+                'total_amount' => $subtotal + $taxAmount + ($po->shipping_cost ?? 0)
+            ]);
+        }
+
+        // 4. Create Delivery Orders for some approved/completed POs
+        $eligiblePos = $pos->whereIn('status', ['approved', 'partial', 'completed']);
+        foreach ($eligiblePos->random(min(8, $eligiblePos->count())) as $po) {
+            $do = \App\Models\DeliveryOrder::factory()->create([
+                'purchase_order_id' => $po->id,
+                'supplier_id' => $po->supplier_id,
+            ]);
+
+            foreach ($po->items as $item) {
+                \App\Models\DeliveryOrderItem::factory()->create([
+                    'delivery_order_id' => $do->id,
+                    'purchase_order_item_id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'quantity_delivered' => $item->quantity_ordered,
+                    'quantity_accepted' => $item->quantity_ordered,
+                ]);
+            }
+        }
+
+        // 5. Create Invoices for some POs
+        foreach ($pos->random(min(10, $pos->count())) as $po) {
+            $invoice = \App\Models\Invoice::factory()->create([
+                'purchase_order_id' => $po->id,
+                'supplier_id' => $po->supplier_id,
+                'subtotal' => $po->subtotal,
+                'tax_amount' => $po->tax_amount,
+                'total_amount' => $po->total_amount,
+            ]);
+
+            foreach ($po->items as $item) {
+                \App\Models\InvoiceItem::factory()->create([
+                    'invoice_id' => $invoice->id,
+                    'purchase_order_item_id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'quantity' => $item->quantity_ordered,
+                    'unit_price' => $item->unit_price,
+                    'tax_rate' => $item->tax_rate,
+                    'subtotal' => $item->subtotal,
+                ]);
+            }
+        }
     }
 
     /**
