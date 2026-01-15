@@ -185,7 +185,6 @@
         </div>
     </form>
     @endif
-    @endif
 </div>
 @endsection
 
