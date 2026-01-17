@@ -78,6 +78,38 @@
                         Invoices
                     </a>
                 </div>
+
+                <div class="nav-section-title">Warehouse Management</div>
+                <div class="nav-item">
+                    <a href="{{ route('warehouses.index') }}" class="nav-link {{ request()->routeIs('warehouses.*') ? 'active' : '' }}">
+                        <i data-feather="archive" class="nav-icon"></i>
+                        Warehouses
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('stores.index') }}" class="nav-link {{ request()->routeIs('stores.*') ? 'active' : '' }}">
+                        <i data-feather="shopping-cart" class="nav-icon"></i>
+                        Stores
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('stock-transfers.create-request') }}" class="nav-link {{ request()->routeIs('stock-transfers.create-request') ? 'active' : '' }}">
+                        <i data-feather="download" class="nav-icon"></i>
+                        Request Stock
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('stock-transfers.index') }}" class="nav-link {{ request()->routeIs('stock-transfers.*') ? 'active' : '' }}">
+                        <i data-feather="truck" class="nav-icon"></i>
+                        Stock Transfers
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('stock-opnames.index') }}" class="nav-link {{ request()->routeIs('stock-opnames.*') ? 'active' : '' }}">
+                        <i data-feather="check-square" class="nav-icon"></i>
+                        Stock Opname
+                    </a>
+                </div>
             </div>
         </nav>
     </aside>

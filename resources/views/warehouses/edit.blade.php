@@ -1,0 +1,88 @@
+@extends('layouts.app')
+
+@section('title', 'Edit Warehouse: ' . $warehouse->name)
+
+@section('breadcrumb')
+<nav class="breadcrumb">
+    <div class="breadcrumb-item">
+        <i data-feather="home"></i>
+        <a href="{{ route('home') }}">Home</a>
+    </div>
+    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
+    <div class="breadcrumb-item">
+        <a href="{{ route('warehouses.index') }}">Warehouses</a>
+    </div>
+    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
+    <div class="breadcrumb-item active">Edit</div>
+</nav>
+@endsection
+
+@section('content')
+<div class="p-4 md:p-8 max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
+                <i data-feather="edit" class="w-5 h-5"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Edit Warehouse</h1>
+        </div>
+        <p class="text-slate-500 ml-13">Update details for <span class="font-bold text-slate-700">{{ $warehouse->name }}</span>.</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-[2rem] border border-slate-200 shadow-xl overflow-hidden">
+        <form action="{{ route('warehouses.update', $warehouse) }}" method="POST">
+            @csrf
+            @method('PUT')
+            
+            <div class="p-8 md:p-10 space-y-8">
+                <!-- Name Section -->
+                <div>
+                    <label for="name" class="block text-sm font-bold text-slate-700 mb-2">Warehouse Name <span class="text-red-500">*</span></label>
+                    <input type="text" 
+                           name="name" 
+                           id="name" 
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-slate-400 @error('name') border-red-300 focus:border-red-500 focus:ring-red-500/20 @enderror"
+                           value="{{ old('name', $warehouse->name) }}" 
+                           required>
+                    @error('name')
+                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1"><i data-feather="alert-circle" class="w-3 h-3"></i> {{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Address Section -->
+                <div>
+                    <label for="address" class="block text-sm font-bold text-slate-700 mb-2">Location Address</label>
+                    <textarea name="address" 
+                              id="address" 
+                              rows="3" 
+                              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-slate-400 @error('address') border-red-300 focus:border-red-500 focus:ring-red-500/20 @enderror">{{ old('address', $warehouse->address) }}</textarea>
+                    @error('address')
+                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1"><i data-feather="alert-circle" class="w-3 h-3"></i> {{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Description Section -->
+                <div>
+                    <label for="description" class="block text-sm font-bold text-slate-700 mb-2">Description <span class="text-slate-400 font-normal">(Optional)</span></label>
+                    <textarea name="description" 
+                              id="description" 
+                              rows="3" 
+                              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-slate-400">{{ old('description', $warehouse->description) }}</textarea>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-slate-50 p-8 flex items-center justify-end gap-4 border-t border-slate-100">
+                <a href="{{ route('warehouses.index') }}" class="px-6 py-3 font-bold text-slate-600 hover:text-slate-800 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="flex items-center gap-2 px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold shadow-lg shadow-amber-200 transition-all active:scale-95">
+                    <i data-feather="check" class="w-5 h-5"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection

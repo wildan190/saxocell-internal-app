@@ -120,6 +120,23 @@
                     <textarea name="notes" class="form-control" rows="4" placeholder="Mention any global issues with this delivery..."></textarea>
                 </div>
             </div>
+            
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i data-feather="map-pin"></i>
+                    Destination Warehouse
+                </h3>
+                <div class="form-group">
+                    <label class="form-label">Receive Item Into</label>
+                    <select name="warehouse_id" class="form-select" required>
+                        <option value="">-- Select Warehouse --</option>
+                        @foreach($warehouses as $warehouse)
+                            <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-xs text-slate-500 mt-2">All items accepted in this delivery will be added to this warehouse's inventory.</p>
+                </div>
+            </div>
         </div>
 
         <!-- line Items -->

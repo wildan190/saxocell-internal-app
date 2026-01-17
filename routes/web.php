@@ -64,3 +64,34 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/procurement/invoices/{id}', [\App\Http\Controllers\InvoiceController::class, 'show'])->name('invoices.show');
 });
 
+// Warehouse & Store Management
+Route::middleware(['auth'])->group(function () {
+    // Warehouses
+    Route::resource('warehouses', \App\Http\Controllers\WarehouseController::class);
+    
+    // Stores
+    // Stores
+    Route::put('stores/{store}/inventory/{inventory}/toggle-status', [\App\Http\Controllers\StoreController::class, 'toggleInventoryStatus'])->name('stores.inventory.toggle-status');
+    Route::resource('stores', \App\Http\Controllers\StoreController::class);
+    
+    // Stock Transfers
+    Route::get('/stock-transfers/create-request', [\App\Http\Controllers\StockTransferController::class, 'createRequest'])->name('stock-transfers.create-request');
+    Route::post('/stock-transfers/request', [\App\Http\Controllers\StockTransferController::class, 'storeRequest'])->name('stock-transfers.store-request');
+    
+    Route::get('/stock-transfers', [\App\Http\Controllers\StockTransferController::class, 'index'])->name('stock-transfers.index');
+    Route::get('/stock-transfers/create', [\App\Http\Controllers\StockTransferController::class, 'create'])->name('stock-transfers.create');
+    Route::post('/stock-transfers', [\App\Http\Controllers\StockTransferController::class, 'store'])->name('stock-transfers.store');
+    Route::get('/stock-transfers/{id}', [\App\Http\Controllers\StockTransferController::class, 'show'])->name('stock-transfers.show');
+    
+    Route::post('/stock-transfers/{id}/approve', [\App\Http\Controllers\StockTransferController::class, 'approve'])->name('stock-transfers.approve');
+    Route::post('/stock-transfers/{id}/reject', [\App\Http\Controllers\StockTransferController::class, 'reject'])->name('stock-transfers.reject');
+    Route::post('/stock-transfers/{id}/receive', [\App\Http\Controllers\StockTransferController::class, 'receive'])->name('stock-transfers.receive');
+    
+    // Stock Opname
+    Route::get('/stock-opnames', [\App\Http\Controllers\StockOpnameController::class, 'index'])->name('stock-opnames.index');
+    Route::get('/stock-opnames/create', [\App\Http\Controllers\StockOpnameController::class, 'create'])->name('stock-opnames.create');
+    Route::post('/stock-opnames', [\App\Http\Controllers\StockOpnameController::class, 'store'])->name('stock-opnames.store');
+    Route::get('/stock-opnames/{id}', [\App\Http\Controllers\StockOpnameController::class, 'show'])->name('stock-opnames.show');
+    Route::post('/stock-opnames/{id}/finalize', [\App\Http\Controllers\StockOpnameController::class, 'finalize'])->name('stock-opnames.finalize');
+});
+

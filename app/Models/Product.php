@@ -164,4 +164,14 @@ class Product extends Model
     {
         return $this->hasMany(\App\Models\InventoryTransaction::class);
     }
+
+    public function warehouseInventory(): HasMany
+    {
+        return $this->hasMany(WarehouseInventory::class);
+    }
+
+    public function storeInventory(): HasMany
+    {
+        return $this->hasMany(StoreInventory::class);
+    }
 }
