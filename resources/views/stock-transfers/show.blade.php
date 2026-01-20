@@ -10,27 +10,7 @@
     </div>
     <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
     <div class="breadcrumb-item">
-        <a href="{{ route('stock-transfers.index') }}">Stock Transfers</a>
-    </div>
-    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
-    <div class="breadcrumb-item active">{{ $transfer->reference_number }}</div>
-</nav>
-@endsection
-
-@section('content')
-@extends('layouts.app')
-
-@section('title', ($transfer->status == 'requested' ? 'Stock Request #' : 'Stock Transfer #') . $transfer->reference_number)
-
-@section('breadcrumb')
-<nav class="breadcrumb">
-    <div class="breadcrumb-item">
-        <i data-feather="home"></i>
-        <a href="{{ route('home') }}">Home</a>
-    </div>
-    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
-    <div class="breadcrumb-item">
-        <a href="{{ route('stock-transfers.index') }}">Stock Transfers</a>
+        <a href="{{ route('stock-transfers.index') }}">Logistics</a>
     </div>
     <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
     <div class="breadcrumb-item active">{{ $transfer->reference_number }}</div>
@@ -39,148 +19,161 @@
 
 @section('content')
 <div class="content-wrapper">
-    <div class="page-header">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
-            <h1 class="page-title">
-                {{ $transfer->status == 'requested' ? 'Stock Request' : 'Stock Transfer' }}
-                <span class="text-muted fw-normal">#{{ $transfer->reference_number }}</span>
-            </h1>
-            <p class="page-subtitle">
-                <i data-feather="calendar" style="width: 14px; height: 14px; vertical-align: text-top;"></i>
-                Created on {{ $transfer->created_at->format('M d, Y') }}
-            </p>
+            <div class="flex items-center gap-3 mb-2">
+                <span class="px-3 py-1 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg">
+                    {{ $transfer->status == 'requested' ? 'STOCK REQUEST' : 'INTERNAL TRANSFER' }}
+                </span>
+                <span class="text-slate-400 font-mono text-sm">#{{ $transfer->reference_number }}</span>
+            </div>
+            <h1 class="text-4xl font-black text-slate-900 tracking-tight">Logistics Workflow</h1>
         </div>
         
-        <div class="action-bar-header">
+        <div class="flex flex-wrap gap-3">
             @if($transfer->status == 'requested')
-                <form action="{{ route('stock-transfers.approve', $transfer->id) }}" method="POST" onsubmit="return confirm('Approve this request? Stock will be deducted from Warehouse.');" class="d-inline">
+                <form action="{{ route('stock-transfers.approve', $transfer->id) }}" method="POST" onsubmit="return confirm('Approve this request? Stock will be deducted from Warehouse.');">
                     @csrf
-                    <button type="submit" class="btn btn-success">
-                        <i data-feather="check-circle"></i> Approve Request
+                    <button type="submit" class="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95">
+                        <i data-feather="check-circle" class="w-4 h-4"></i> Approve Request
                     </button>
                 </form>
-                <form action="{{ route('stock-transfers.reject', $transfer->id) }}" method="POST" onsubmit="return confirm('Reject and cancel this request?');" class="d-inline">
+                <form action="{{ route('stock-transfers.reject', $transfer->id) }}" method="POST" onsubmit="return confirm('Reject and cancel this request?');">
                     @csrf
-                    <button type="submit" class="btn btn-danger">
-                        <i data-feather="x-circle"></i> Reject
+                    <button type="submit" class="flex items-center gap-2 px-6 py-2.5 bg-white border border-red-200 text-red-600 hover:bg-red-50 rounded-xl font-bold transition-all active:scale-95">
+                        <i data-feather="x-circle" class="w-4 h-4"></i> Reject
                     </button>
                 </form>
             @endif
-
-            <a href="{{ route('stock-transfers.index') }}" class="btn btn-secondary">
-                <i data-feather="arrow-left"></i> Back
+            <a href="{{ route('stock-transfers.index') }}" class="flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all active:scale-95">
+                <i data-feather="arrow-left" class="w-4 h-4"></i> Back
             </a>
         </div>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success">
-            <i data-feather="check-circle"></i>
-            {{ session('success') }}
+        <div class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
+            <i data-feather="check-circle" class="w-5 h-5"></i>
+            <span class="text-sm font-bold">{{ session('success') }}</span>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger">
-            <i data-feather="alert-circle"></i>
-            {{ session('error') }}
+        <div class="mb-8 p-4 bg-red-50 border border-red-100 text-red-700 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
+            <i data-feather="alert-circle" class="w-5 h-5"></i>
+            <span class="text-sm font-bold">{{ session('error') }}</span>
         </div>
     @endif
 
     <!-- Main Detail Card -->
-    <div class="card">
-        <!-- Status & Route Header -->
-        <div class="card-body border-bottom bg-light">
-            <div class="d-flex flex-column flex-md-row gap-4 align-items-start">
-                <div class="d-flex align-items-center justify-content-center bg-white rounded-3 border" style="width: 80px; height: 80px;">
-                    <i data-feather="{{ $transfer->status == 'requested' ? 'download' : 'truck' }}" style="width: 40px; height: 40px; color: #6c757d;"></i>
+    <div class="bg-white/95 backdrop-blur-xl rounded-[2.5rem] border border-slate-200/60 shadow-xl overflow-hidden">
+        <!-- Route Analysis Header -->
+        <div class="p-8 md:p-10 border-b border-slate-100 bg-slate-50/20 flex flex-col md:flex-row gap-10 items-center">
+            <div class="w-24 h-24 bg-white border-2 border-slate-100 text-slate-400 rounded-3xl flex items-center justify-center shrink-0 shadow-inner">
+                <i data-feather="{{ $transfer->status == 'requested' ? 'download-cloud' : 'truck' }}" class="w-12 h-12"></i>
+            </div>
+
+            <div class="flex-1 w-full">
+                <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+                    @php
+                        $config = match($transfer->status) {
+                            'requested' => ['bg' => 'bg-blue-600', 'text' => 'text-white', 'label' => 'NEW REQUEST'],
+                            'pending'   => ['bg' => 'bg-amber-500', 'text' => 'text-white', 'label' => 'IN TRANSIT'],
+                            'received', 'completed' => ['bg' => 'bg-emerald-600', 'text' => 'text-white', 'label' => 'DELIVERED'],
+                            'rejected', 'cancelled' => ['bg' => 'bg-red-600', 'text' => 'text-white', 'label' => 'REJECTED'],
+                            default     => ['bg' => 'bg-slate-600', 'text' => 'text-white', 'label' => strtoupper($transfer->status)]
+                        };
+                    @endphp
+                    <span class="px-4 py-1.5 {{ $config['bg'] }} {{ $config['text'] }} rounded-full text-[10px] font-black tracking-widest leading-none">
+                        {{ $config['label'] }}
+                    </span>
+                    <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+                        <i data-feather="clock" class="w-3.5 h-3.5"></i>
+                        Created {{ $transfer->created_at->format('M d, Y @ H:i') }}
+                    </span>
                 </div>
 
-                <div class="flex-grow-1">
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                        @php
-                            $badgeClass = match($transfer->status) {
-                                'completed', 'received' => 'bg-success-subtle text-success',
-                                'pending', 'requested' => 'bg-warning-subtle text-warning',
-                                'cancelled', 'rejected' => 'bg-danger-subtle text-danger',
-                                default => 'bg-secondary-subtle text-secondary'
-                            };
-                        @endphp
-                        <span class="badge {{ $badgeClass }} text-uppercase">
-                            {{ $transfer->status }}
-                        </span>
-                        <span class="badge bg-dark text-white text-uppercase">
-                            INTERNAL MOVEMENT
-                        </span>
+                <div class="flex items-center justify-center md:justify-start gap-8">
+                    <div>
+                        <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">Shipped From</span>
+                        <div class="flex items-center gap-2">
+                            <i data-feather="archive" class="w-4 h-4 text-blue-500"></i>
+                            <span class="text-lg font-black text-slate-800">{{ $transfer->sourceWarehouse->name }}</span>
+                        </div>
                     </div>
-                    
-                    <div class="row g-4 mt-2">
-                        <div class="col-md-5">
-                            <span class="d-block text-uppercase text-muted fw-bold text-xs mb-1">From (Source)</span>
-                            <div class="d-flex align-items-center gap-2">
-                                <i data-feather="archive" class="text-muted"></i>
-                                <span class="fw-bold text-dark fs-5">{{ $transfer->sourceWarehouse->name }}</span>
-                            </div>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-center justify-content-center text-muted">
-                            <i data-feather="arrow-right" style="width: 24px; height: 24px;"></i>
-                        </div>
-                        <div class="col-md-5">
-                            <span class="d-block text-uppercase text-muted fw-bold text-xs mb-1">To (Destination)</span>
-                            <div class="d-flex align-items-center gap-2">
-                                <i data-feather="shopping-cart" class="text-muted"></i>
-                                <span class="fw-bold text-dark fs-5">{{ $transfer->destinationStore->name }}</span>
-                            </div>
+                    <div class="p-3 bg-slate-100 rounded-2xl text-slate-300">
+                        <i data-feather="arrow-right" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">Destination</span>
+                        <div class="flex items-center gap-2">
+                            <i data-feather="shopping-cart" class="w-4 h-4 text-emerald-500"></i>
+                            <span class="text-lg font-black text-slate-800">{{ $transfer->destinationStore->name }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card-body">
+        <div class="p-8 md:p-10">
+            <h3 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center gap-3">
+                <span class="p-2 bg-slate-100 rounded-lg"><i data-feather="package" class="w-5 h-5 text-slate-600"></i></span>
+                Manifest Details
+            </h3>
+            
             <form action="{{ route('stock-transfers.receive', $transfer->id) }}" method="POST">
                 @csrf
-                
-                <h3 class="card-title mb-4">
-                    <i data-feather="list"></i>
-                    Transfer Items
-                </h3>
-                
-                <div class="table-container">
-                    <table class="table">
+                <div class="overflow-x-auto rounded-3xl border border-slate-100">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>SKU</th>
-                                <th class="text-end">
-                                    {{ $transfer->status == 'requested' ? 'Qty Requested' : 'Qty Sent' }}
+                            <tr class="bg-slate-50/50">
+                                <th class="px-8 py-5 text-[11px] font-black text-slate-500 uppercase tracking-widest">Product Information</th>
+                                <th class="px-8 py-5 text-[11px] font-black text-slate-500 uppercase tracking-widest text-center">Reference SKU</th>
+                                <th class="px-8 py-5 text-[11px] font-black text-slate-500 uppercase tracking-widest text-center">
+                                    {{ $transfer->status == 'requested' ? 'Units Requested' : 'Units Sent' }}
                                 </th>
-                                <th class="text-end" style="width: 200px;">
-                                    {{ $transfer->status == 'requested' ? 'Pending Action' : 'Qty Received' }}
+                                <th class="px-8 py-5 text-[11px] font-black text-slate-500 uppercase tracking-widest text-right">
+                                    {{ $transfer->status == 'requested' ? 'Action' : 'Units Received' }}
                                 </th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-slate-50">
                             @foreach($transfer->items as $item)
-                            <tr>
-                                <td>
-                                    <span class="fw-bold text-dark">{{ $item->product->name }}</span>
+                            <tr class="hover:bg-slate-50/30 transition-colors">
+                                <td class="px-8 py-6">
+                                    <span class="font-bold text-slate-800 leading-tight block">{{ $item->product->name }}</span>
                                 </td>
-                                <td class="text-muted">{{ $item->product->sku }}</td>
-                                <td class="text-end fw-bold">{{ $item->quantity_sent }}</td>
-                                <td class="text-end">
+                                <td class="px-8 py-6 text-center">
+                                    <span class="font-mono text-[11px] px-2 py-1 bg-slate-100 text-slate-500 rounded-md">{{ $item->product->sku }}</span>
+                                </td>
+                                <td class="px-8 py-6 text-center">
+                                    <span class="text-lg font-black text-slate-700">{{ $item->quantity_sent }}</span>
+                                </td>
+                                <td class="px-8 py-6 text-right">
                                     @if($transfer->status == 'pending')
-                                        <input type="number" 
-                                               name="items[{{ $item->id }}]" 
-                                               class="form-control text-end fs-6 fw-bold" 
-                                               value="{{ old("items.{$item->id}", $item->quantity_sent) }}" 
-                                               min="0"
-                                               max="{{ $item->quantity_sent }}"
-                                               required>
+                                        <div class="flex justify-end">
+                                            <input type="number" 
+                                                   name="items[{{ $item->id }}]" 
+                                                   class="w-32 px-4 py-2 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 focus:bg-white rounded-xl font-black text-slate-800 text-right transition-all outline-none" 
+                                                   value="{{ old("items.{$item->id}", $item->quantity_sent) }}" 
+                                                   min="0"
+                                                   max="{{ $item->quantity_sent }}"
+                                                   required>
+                                        </div>
                                     @else
-                                        <span class="fw-bold {{ $item->quantity_received < $item->quantity_sent ? 'text-warning' : 'text-success' }}">
-                                            {{ $item->quantity_received }}
-                                        </span>
+                                        @if($transfer->status == 'requested')
+                                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Awaiting Approval</span>
+                                        @else
+                                            <div class="flex items-center justify-end gap-2">
+                                                @if($item->quantity_received < $item->quantity_sent)
+                                                    <span class="px-2 py-0.5 bg-red-100 text-red-600 rounded-md text-[10px] font-black">-{{ $item->quantity_sent - $item->quantity_received }} MISMATCH</span>
+                                                @endif
+                                                <span class="text-lg font-black {{ $item->quantity_received < $item->quantity_sent ? 'text-amber-500' : 'text-emerald-600' }}">
+                                                    {{ $item->quantity_received }}
+                                                </span>
+                                            </div>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>
@@ -190,9 +183,9 @@
                 </div>
 
                 @if($transfer->status == 'pending')
-                <div class="mt-4 text-end">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i data-feather="check-square"></i> Confirm Receipt
+                <div class="mt-10 flex justify-end">
+                    <button type="submit" class="flex items-center gap-3 px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black shadow-xl shadow-emerald-100 transition-all active:scale-95 text-lg">
+                        <i data-feather="check-square" class="w-6 h-6"></i> Confirm Final Receipt
                     </button>
                 </div>
                 @endif
@@ -200,6 +193,14 @@
         </div>
     </div>
 </div>
-@endsection
 
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    });
+</script>
+@endpush
 @endsection

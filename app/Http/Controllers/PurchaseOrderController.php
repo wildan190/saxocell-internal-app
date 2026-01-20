@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PurchaseOrderController extends Controller
 {
@@ -153,5 +154,17 @@ class PurchaseOrderController extends Controller
         $po->delete();
         Cache::tags(['purchase_orders'])->flush();
         return redirect()->route('purchase-orders.index')->with('success', 'Purchase Order deleted.');
+    }
+
+    public function downloadPdf($id)
+    {
+        $po = PurchaseOrder::with('supplier', 'items.product', 'items.variant', 'creator', 'approver')->findOrFail($id);
+        
+        $pdf = Pdf::loadView('procurement.purchase-orders.pdf', compact('po'));
+        
+        // Set paper to A4 and orientation to portrait
+        $pdf->setPaper('a4', 'portrait');
+        
+        return $pdf->download("PO-{$po->po_number}.pdf");
     }
 }

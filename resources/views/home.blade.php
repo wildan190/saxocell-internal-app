@@ -98,6 +98,62 @@
         </div>
     </div>
 
+    <!-- Products Needing Review Section -->
+    @if(isset($needsReviewCount) && $needsReviewCount > 0)
+    <div class="mb-8">
+        <div class="card overflow-hidden border-l-4 border-l-amber-500 shadow-md">
+            <div class="card-header border-b border-slate-100 p-6 flex justify-between items-center bg-amber-50/10">
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <i data-feather="alert-triangle" class="w-5 h-5 text-amber-500"></i>
+                    Price Review Required
+                </h3>
+                <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg text-xs font-black uppercase tracking-widest">
+                    {{ $needsReviewCount }} PENDING
+                </span>
+            </div>
+            <div class="p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead class="bg-slate-50/50">
+                            <tr>
+                                <th class="text-[10px] font-black uppercase tracking-widest px-6 py-3">Product Item</th>
+                                <th class="text-[10px] font-black uppercase tracking-widest px-6 py-3">Suggested Price</th>
+                                <th class="text-[10px] font-black uppercase tracking-widest px-6 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach($productsNeedingReview as $product)
+                            <tr class="hover:bg-slate-50/30 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-800">{{ $product->name }}</div>
+                                    <div class="text-[10px] text-slate-400 font-mono mt-0.5">{{ $product->sku }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="font-black text-emerald-600">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                    <div class="text-[9px] text-slate-500 mt-0.5 uppercase tracking-tighter font-bold">COST: Rp {{ number_format($product->cost_price, 0, ',', '.') }}</div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-primary btn-sm px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg">
+                                        Adjust Price
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @if($needsReviewCount > 5)
+                <div class="p-4 text-center border-t border-slate-50 bg-slate-50/30">
+                    <a href="{{ route('products.needs-review') }}" class="text-xs font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest flex items-center justify-center gap-2">
+                        View All {{ $needsReviewCount }} Products <i data-feather="arrow-right" class="w-3 h-3"></i>
+                    </a>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Quick Actions -->
         <div class="lg:col-span-2">
@@ -163,13 +219,12 @@
                 </div>
                 <div class="p-0">
                     <div class="divide-y divide-slate-50">
-                        <!-- Mock Data - Ideally this should come from an ActivityLog model -->
                         <div class="p-4 hover:bg-slate-50 transition-colors flex gap-3">
                             <div class="w-2 h-2 mt-2 rounded-full bg-blue-500 shrink-0"></div>
                             <div>
-                                <p class="text-sm font-medium text-slate-800">System Login</p>
-                                <p class="text-xs text-slate-500 mt-0.5">You logged in successfully.</p>
-                                <p class="text-[10px] text-slate-400 mt-1">Just now</p>
+                                <p class="text-sm font-medium text-slate-800">System Activity</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Monitoring inventory health...</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Online</p>
                             </div>
                         </div>
                     </div>

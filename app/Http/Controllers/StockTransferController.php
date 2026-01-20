@@ -19,7 +19,15 @@ class StockTransferController extends Controller
     public function index()
     {
         $transfers = StockTransfer::with(['sourceWarehouse', 'destinationStore'])->latest()->get();
-        return view('stock-transfers.index', compact('transfers'));
+        
+        $stats = [
+            'total' => $transfers->count(),
+            'pending' => $transfers->where('status', 'pending')->count(),
+            'requested' => $transfers->where('status', 'requested')->count(),
+            'received' => $transfers->where('status', 'received')->count(),
+        ];
+
+        return view('stock-transfers.index', compact('transfers', 'stats'));
     }
 
     public function create(Request $request)

@@ -46,8 +46,16 @@ class StoreController extends Controller
      */
     public function show(Store $store)
     {
-        $store->load('inventory.product');
-        return view('stores.show', compact('store'));
+        $store->load(['inventory.product']);
+        
+        $stats = [
+            'total_skus' => $store->inventory->count(),
+            'active_products' => $store->inventory->where('is_active', true)->count(),
+            'low_stock' => $store->inventory->where('quantity', '<=', 5)->count(),
+            'out_of_stock' => $store->inventory->where('quantity', '<=', 0)->count(),
+        ];
+
+        return view('stores.show', compact('store', 'stats'));
     }
 
     /**

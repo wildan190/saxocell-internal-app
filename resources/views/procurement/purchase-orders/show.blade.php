@@ -15,12 +15,14 @@
     <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
     <div class="breadcrumb-item active">{{ $po->po_number }}</div>
 </nav>
+
+</nav>
 @endsection
 
 @section('content')
-<div class="p-4 md:p-8 max-w-7xl mx-auto">
+<div class="main-content-inner content-wrapper bg-white lg:bg-transparent">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+    <div class="page-header-print flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
             <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">{{ $po->po_number }}</h1>
             <p class="text-slate-500 mt-2 flex items-center gap-2">
@@ -36,7 +38,7 @@
             </p>
         </div>
         
-        <div class="flex flex-wrap gap-3">
+        <div class="flex flex-wrap gap-3 print-hidden">
             @if(in_array($po->status, ['draft', 'submitted']))
                 <form action="{{ route('purchase-orders.approve', $po->id) }}" method="POST">
                     @csrf
@@ -45,6 +47,55 @@
                     </button>
                 </form>
             @endif
+            
+            @if($po->supplier->phone)
+                @php
+                    $waPhone = preg_replace('/[^0-9]/', '', $po->supplier->phone);
+                    if (str_starts_with($waPhone, '0')) {
+                        $waPhone = '62' . substr($waPhone, 1);
+                    }
+                    
+                    // Ringkasan item yang komprehensif
+                    $itemSummary = "";
+                    foreach($po->items as $item) {
+                        $name = $item->product ? $item->product->name : $item->item_name;
+                        $itemSummary .= "• *" . $name . "*\n";
+                        if ($item->description) {
+                            $itemSummary .= "  _Catatan: " . $item->description . "_\n";
+                        }
+                        if ($item->variant) {
+                            $itemSummary .= "  _Varian: " . $item->variant->attributes_summary . "_\n";
+                        }
+                        $itemSummary .= "  Jumlah: " . $item->quantity_ordered . " @ Rp " . number_format($item->unit_price, 0, ',', '.') . "\n";
+                        $itemSummary .= "  Subtotal: Rp " . number_format($item->subtotal, 0, ',', '.') . "\n\n";
+                    }
+                    
+                    $waMessage = "📦 *PESANAN PEMBELIAN (PO): " . $po->po_number . "*\n" .
+                                 "--------------------------------\n\n" .
+                                 "*Detail Supplier:*\n" .
+                                 "🏢 Nama Toko: " . $po->supplier->name . "\n" .
+                                 "👤 Kontak: " . $po->supplier->contact_person . "\n\n" .
+                                 "*Informasi Pengiriman:*\n" .
+                                 "📅 Tanggal Order: " . $po->order_date->format('d M Y') . "\n" .
+                                 "🚚 Estimasi Tiba: " . ($po->expected_delivery_date ? $po->expected_delivery_date->format('d M Y') : 'Belum Terjadwal') . "\n" .
+                                 "👨‍💼 Dibuat Oleh: " . $po->creator->name . "\n\n" .
+                                 "*Tujuan Pembelian:*\n" .
+                                 "_" . ($po->notes ?: 'Pesanan stok rutin.') . "_\n\n" .
+                                 "*RINCIAN BARANG:*\n" . $itemSummary . "\n" .
+                                 "--------------------------------\n" .
+                                 "*TOTAL PEMBAYARAN: Rp " . number_format($po->total_amount, 0, ',', '.') . "*\n\n" .
+                                 "Silakan unduh dokumen PDF resmi melalui tautan berikut:\n" . route('purchase-orders.pdf', $po->id);
+                    $waUrl = "https://wa.me/" . $waPhone . "?text=" . urlencode($waMessage);
+                @endphp
+                <a href="{{ $waUrl }}" target="_blank" class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                    <i data-feather="message-circle" class="w-4 h-4"></i> WhatsApp
+                </a>
+            @endif
+
+            <a href="{{ route('purchase-orders.pdf', $po->id) }}" class="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95">
+                <i data-feather="file-text" class="w-4 h-4"></i> Download PDF
+            </a>
+
             <button class="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl font-bold shadow-sm transition-all active:scale-95" onclick="window.print()">
                 <i data-feather="printer" class="w-4 h-4"></i> Print Version
             </button>
@@ -55,7 +106,7 @@
     </div>
 
     <!-- Main Detail Card -->
-    <div class="bg-white/95 backdrop-blur-xl rounded-[2rem] border border-slate-200/60 shadow-xl overflow-hidden">
+    <div id="po-card" class="bg-white/95 backdrop-blur-xl rounded-[2rem] border border-slate-200/60 shadow-xl overflow-hidden">
         <!-- Status & Goal Header -->
         <div class="p-8 md:p-10 border-bottom border-slate-100 bg-slate-50/30 flex flex-col md:flex-row gap-8 items-start">
             <div class="w-24 h-24 bg-blue-50 text-blue-500 rounded-3xl flex items-center justify-center shrink-0 shadow-inner">
@@ -193,7 +244,7 @@
 
     <!-- Related Deliveries Section -->
     @if($po->deliveryOrders->count() > 0)
-    <div class="mt-12">
+    <div class="mt-12 print-hidden">
         <h3 class="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
             <span class="p-2 bg-emerald-50 text-emerald-600 rounded-xl shadow-sm shadow-emerald-100"><i data-feather="package" class="w-6 h-6"></i></span>
             Related Receipts
@@ -232,7 +283,7 @@
     @endphp
 
     @if($pendingResolutions->count() > 0)
-    <div class="mt-12 p-8 bg-amber-50/50 border border-amber-100 rounded-[2rem]">
+    <div class="mt-12 p-8 bg-amber-50/50 border border-amber-100 rounded-[2rem] print-hidden">
         <h3 class="text-xl font-extrabold text-amber-900 mb-6 flex items-center gap-3">
             <span class="p-2 bg-amber-100 rounded-lg text-amber-600"><i data-feather="alert-triangle" class="w-5 h-5"></i></span>
             Pending Resolutions
@@ -279,10 +330,99 @@
 
 <style>
     @media print {
-        .breadcrumb, .action-bar, .btn, .related-section, form { display: none !important; }
-        body { background: white !important; }
-        .max-w-7xl { max-width: 100% !important; padding: 0 !important; }
-        .rounded-\[2rem\] { border-radius: 0 !important; border: none !important; box-shadow: none !important; }
+        /* Hide UI clutter */
+        .sidebar, .topbar, .breadcrumb, .print-hidden, nav, header, aside, .btn, button, form {
+            display: none !important;
+        }
+
+        /* Full width & Stable resets */
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .main-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        .main-content-inner {
+            padding: 0.5cm !important;
+            width: 100% !important;
+        }
+
+        /* Stable Side-by-Side: Using Floats for print reliability */
+        .page-header-print {
+            display: block !important;
+            width: 100% !important;
+            clear: both !important;
+            margin-bottom: 0.5cm !important;
+            overflow: hidden !important;
+        }
+
+        .page-header-print div:first-child {
+            float: left !important;
+            width: 60% !important;
+        }
+
+        /* Card stabilization */
+        #po-card {
+            display: block !important;
+            width: 100% !important;
+            border: 1px solid #e2e8f0 !important;
+            background: white !important;
+            float: none !important;
+            clear: both !important;
+        }
+
+        /* Supplier Grid: Float-based for side-by-side certainty */
+        .grid-cols-4 {
+            display: block !important;
+            width: 100% !important;
+            overflow: hidden !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+
+        .grid-cols-4 > div {
+            float: left !important;
+            width: 25% !important;
+            padding: 0.2cm !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Typography & Compactness */
+        h1 { font-size: 1.5rem !important; margin: 0 !important; }
+        .text-3xl { font-size: 1.5rem !important; }
+        .p-8, .p-10 { padding: 0.3cm !important; }
+        .mb-8, .mb-10, .mt-12 { margin: 0.2cm 0 !important; }
+
+        /* Table Sizing */
+        .table-container { border: 1px solid #e2e8f0 !important; margin: 0.2cm 0 !important; }
+        th, td { padding: 4px 6px !important; font-size: 9pt !important; }
+        thead { background: #f8fafc !important; -webkit-print-color-adjust: exact; }
+
+        /* Financials: Side-by-side float */
+        .financial-bar-print {
+             display: block !important;
+             overflow: hidden !important;
+             width: 100% !important;
+        }
+        
+        .flex-col.md\:flex-row.items-end {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: flex-end !important;
+            gap: 0.5cm !important;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 0.5cm;
+        }
     }
 </style>
 @endsection

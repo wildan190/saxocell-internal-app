@@ -23,7 +23,9 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div style="display: flex; align-items: center;">
-                <div class="sidebar-logo">{{ substr(config('app.name', 'Laravel'), 0, 1) }}</div>
+                <div class="sidebar-logo">
+                    <i data-feather="grid"></i>
+                </div>
                 <span class="sidebar-brand">{{ config('app.name', 'Laravel') }}</span>
             </div>
             <button class="sidebar-toggle" id="sidebarToggle">
@@ -125,7 +127,9 @@
             </button>
             <h1 class="topbar-title">@yield('page-title', 'Dashboard')</h1>
             <div class="user-menu">
-                <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+                <div class="user-avatar" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);">
+                    <i data-feather="user" class="w-5 h-5 text-white/80"></i>
+                </div>
             </div>
         </header>
 
