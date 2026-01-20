@@ -15,6 +15,7 @@ Route::get('/home', function () {
 
 // Products Routes
 Route::middleware(['auth'])->group(function () {
+    Route::get('/products/needs-review', [ProductController::class, 'needsReview'])->name('products.needs-review');
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');

@@ -96,6 +96,11 @@ class ProductRepository implements ProductRepositoryInterface
             $data['image'] = $data['image']->store('products', 'public');
         }
 
+        // Clear needs_price_review if price was changed
+        if ($product->needs_price_review && isset($data['price']) && $data['price'] != $product->price) {
+            $data['needs_price_review'] = false;
+        }
+
         $product->update($data);
 
         Cache::tags(['products'])->flush();

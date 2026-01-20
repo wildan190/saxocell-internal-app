@@ -12,12 +12,14 @@ class Product extends Model
         'name',
         'description',
         'price',
+        'cost_price',
         'category',
         'status',
         'product_specs',
         'sku',
         'stock_quantity',
         'image',
+        'needs_price_review',
     ];
 
     protected $casts = [
@@ -173,5 +175,13 @@ class Product extends Model
     public function storeInventory(): HasMany
     {
         return $this->hasMany(StoreInventory::class);
+    }
+
+    /**
+     * Scope to get products that need price review.
+     */
+    public function scopeNeedsReview($query)
+    {
+        return $query->where('needs_price_review', true);
     }
 }

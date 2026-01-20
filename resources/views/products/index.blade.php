@@ -53,6 +53,23 @@
     </form>
 </div>
 
+@if(isset($needsReviewCount) && $needsReviewCount > 0)
+<div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <i data-feather="alert-triangle" style="width: 20px; height: 20px; color: #d97706;"></i>
+        <div>
+            <p style="font-weight: 700; color: #92400e; margin: 0;">
+                {{ $needsReviewCount }} {{ Str::plural('product', $needsReviewCount) }} need{{ $needsReviewCount == 1 ? 's' : '' }} price review
+            </p>
+            <p style="color: #78350f; font-size: 0.8rem; margin: 0;">Auto-created from Delivery Orders</p>
+        </div>
+    </div>
+    <a href="{{ route('products.needs-review') }}" class="btn btn-sm" style="background: #f59e0b; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; font-size: 0.875rem;">
+        Review Now <i data-feather="arrow-right" style="width: 14px; height: 14px; margin-left: 0.25rem;"></i>
+    </a>
+</div>
+@endif
+
 @if($products->count() > 0)
 <div class="products-grid">
     @foreach($products as $product)
