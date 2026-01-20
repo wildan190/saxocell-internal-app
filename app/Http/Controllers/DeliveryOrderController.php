@@ -24,8 +24,7 @@ class DeliveryOrderController extends Controller
         $selectedPo = null;
         if ($request->filled('po_id')) {
             $selectedPo = PurchaseOrder::with('items.product', 'items.variant', 'supplier')
-                ->where('status', 'approved')
-                ->orWhere('status', 'partial')
+                ->whereIn('status', ['approved', 'partial'])
                 ->findOrFail($request->po_id);
         }
 
@@ -58,6 +57,29 @@ class DeliveryOrderController extends Controller
                 $qtyDelivered = $itemData['quantity_accepted'] + $itemData['quantity_rejected'];
                 
                 if ($qtyDelivered <= 0) continue;
+
+                // Auto-create Product if Ad-hoc item
+                if (!$poItem->product_id && $poItem->item_name) {
+                    $generatedSku = 'GEN-' . strtoupper(uniqid());
+                    $newProduct = \App\Models\Product::create([
+                        'name' => $poItem->item_name,
+                        'sku' => $generatedSku, 
+                        'description' => $poItem->description ?? 'Auto-created from PO ' . $po->po_number,
+                        'price' => $poItem->unit_price,
+                        'category' => 'new',
+                        'status' => 'active',
+                        'stock_quantity' => 0,
+                    ]);
+
+                    // Link PO Item to new Product to prevent re-creation
+                    $poItem->update([
+                        'product_id' => $newProduct->id,
+                        'product_variant_id' => null // Ensure variant is null
+                    ]);
+                    
+                    // Refresh local instance
+                    $poItem->product_id = $newProduct->id;
+                }
                 
                 // Create DO Item
                 $do->items()->create([

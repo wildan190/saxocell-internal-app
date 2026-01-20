@@ -150,44 +150,66 @@
 
 <!-- Row Template (Hidden) -->
 <template id="itemRowTemplate">
-    <tr class="item-row hover:bg-slate-50 transition-colors">
+    <tr class="item-row hover:bg-slate-50 transition-colors border-b border-slate-100 align-top">
         <td class="p-3">
-            <div class="flex flex-col gap-2">
-                <select name="items[INDEX][product_id]" class="form-select product-select text-sm w-full font-medium" required>
-                    <option value="">Select Product...</option>
-                    @foreach($products as $product)
-                        <option value="{{ $product->id }}" data-variants="{{ json_encode($product->variants) }}">
-                            {{ $product->name }}
-                        </option>
-                    @endforeach
-                </select>
-                <div class="variant-container hidden">
-                    <select name="items[INDEX][product_variant_id]" class="form-select variant-select text-xs bg-slate-50 border-slate-200">
-                        <option value="">Choose Variant...</option>
+            <div class="flex flex-col gap-3">
+                <!-- Mode Toggle -->
+                <div class="flex items-center gap-2">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer manual-toggle" name="items[INDEX][is_manual]" value="1">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span class="ml-2 text-xs font-medium text-slate-600">Manual Entry</span>
+                    </label>
+                </div>
+
+                <!-- Product Select (Catalog Mode) -->
+                <div class="catalog-input-group">
+                    <select name="items[INDEX][product_id]" class="form-select product-select text-sm w-full font-medium shadow-sm border-slate-300 rounded-md">
+                        <option value="">Select Product...</option>
+                        @foreach($products as $product)
+                            <option value="{{ $product->id }}" data-variants="{{ json_encode($product->variants) }}">
+                                {{ $product->name }}
+                            </option>
+                        @endforeach
                     </select>
+                    <div class="variant-container mt-2 hidden">
+                        <select name="items[INDEX][product_variant_id]" class="form-select variant-select text-xs bg-slate-50 border-slate-200 rounded-md w-full">
+                            <option value="">Choose Variant...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Manual Input (Manual Mode) -->
+                <div class="manual-input-group hidden">
+                    <input type="text" name="items[INDEX][item_name]" class="form-control text-sm w-full font-medium shadow-sm border-slate-300 rounded-md placeholder-slate-400" placeholder="Enter Item Name">
+                </div>
+
+                <!-- Description (Common) -->
+                <div>
+                   <input type="text" name="items[INDEX][description]" class="form-control text-xs text-slate-500 w-full border-slate-200 rounded bg-slate-50 placeholder-slate-400" placeholder="Additional Details / Description...">
                 </div>
             </div>
         </td>
-        <td class="p-3 align-top">
-            <input type="number" name="items[INDEX][quantity_ordered]" class="form-control qty-input text-center font-medium" min="1" value="1" required>
+        <td class="p-3">
+            <input type="number" name="items[INDEX][quantity_ordered]" class="form-control qty-input text-center font-medium w-full" min="1" value="1" required>
         </td>
-        <td class="p-3 align-top">
+        <td class="p-3">
             <div class="relative">
-                <span class="absolute left-3 top-2.5 text-slate-400 text-sm">Rp</span>
-                <input type="number" name="items[INDEX][unit_price]" class="form-control price-input pl-10" min="0" step="0.01" placeholder="0" required>
+                <span class="absolute left-3 top-2 text-slate-400 text-sm">Rp</span>
+                <input type="number" name="items[INDEX][unit_price]" class="form-control price-input pl-10 w-full" min="0" step="0.01" placeholder="0" required>
             </div>
         </td>
-        <td class="p-3 align-top">
+        <td class="p-3">
             <div class="relative">
-                <input type="number" name="items[INDEX][tax_rate]" class="form-control tax-input text-center" min="0" max="100" value="11">
-                <span class="absolute right-8 top-2.5 text-slate-400 text-sm opacity-50">%</span>
+                <input type="number" name="items[INDEX][tax_rate]" class="form-control tax-input text-center w-full" min="0" max="100" value="11">
+                <span class="absolute right-8 top-2 text-slate-400 text-sm opacity-50">%</span>
             </div>
         </td>
-        <td class="p-3 align-top text-right font-bold text-slate-700 bg-slate-50/50 item-total pt-4">
+        <td class="p-3 text-right font-bold text-slate-700 bg-slate-50/50 item-total pt-4 rounded-r-lg align-top">
             Rp 0
         </td>
-        <td class="p-3 align-top text-right">
-            <button type="button" class="text-slate-400 hover:text-red-500 transition-colors delete-item p-2">
+        <td class="p-3 text-right align-top">
+            <button type="button" class="text-slate-400 hover:text-red-500 transition-colors delete-item p-2 rounded-full hover:bg-slate-100">
                 <i data-feather="trash-2" class="w-4 h-4"></i>
             </button>
         </td>
@@ -202,7 +224,42 @@
         const itemsBody = itemsTable.getElementsByTagName('tbody')[0];
         const addItemBtn = document.getElementById('addItem');
         const rowTemplate = document.getElementById('itemRowTemplate');
+        document.getElementById('poForm').reset(); // Reset form to clear cached values on reload
         let rowIndex = 0;
+
+        // --- Event Delegation for Mode Toggle ---
+        itemsTable.addEventListener('change', function(e) {
+            if (e.target.matches('.manual-toggle')) {
+                const toggle = e.target;
+                const row = toggle.closest('tr');
+                const catalogGroup = row.querySelector('.catalog-input-group');
+                const manualGroup = row.querySelector('.manual-input-group');
+                const productSelect = row.querySelector('.product-select');
+                const itemNameInput = row.querySelector('input[name*="[item_name]"]');
+
+                if (toggle.checked) {
+                    // Switch to Manual
+                    catalogGroup.classList.add('hidden');
+                    manualGroup.classList.remove('hidden');
+                    
+                    productSelect.required = false;
+                    productSelect.value = ""; // Clear selection
+                    
+                    itemNameInput.required = true;
+                    // Trigger change to hide variants if any were visible
+                    productSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                } else {
+                    // Switch to Catalog
+                    manualGroup.classList.add('hidden');
+                    catalogGroup.classList.remove('hidden');
+                    
+                    itemNameInput.required = false;
+                    itemNameInput.value = "";
+                    
+                    productSelect.required = true;
+                }
+            }
+        });
 
         // --- Event Delegation for Calculations ---
         itemsTable.addEventListener('input', function(e) {
@@ -218,8 +275,6 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Optional: Prevent deleting the last row if required, 
-                // but checking current count allows deleting down to 0 and showing empty state.
                 const row = deleteBtn.closest('tr');
                 if (row) {
                     row.remove();
@@ -243,14 +298,13 @@
                 // Reset variant select
                 variantSelect.innerHTML = '<option value="">Choose Variant...</option>';
                 
-                if (variantsData) {
+                if (variantsData && select.value !== "") {
                     try {
                         const variants = JSON.parse(variantsData);
                         if (variants.length > 0) {
                             variants.forEach(v => {
                                 const opt = document.createElement('option');
                                 opt.value = v.id;
-                                // Handle attribute formatting safely
                                 const name = v.name || v.sku || 'Variant';
                                 let attrs = '';
                                 if (v.formatted_attributes) {
@@ -259,18 +313,18 @@
                                 opt.textContent = attrs ? `${name} (${attrs})` : name;
                                 variantSelect.appendChild(opt);
                             });
-                            variantContainer.style.display = 'block';
+                            variantContainer.classList.remove('hidden');
                             variantSelect.required = true;
                         } else {
-                            variantContainer.style.display = 'none';
+                            variantContainer.classList.add('hidden');
                             variantSelect.required = false;    
                         }
                     } catch (err) {
                         console.error("Error parsing variants", err);
-                        variantContainer.style.display = 'none';
+                        variantContainer.classList.add('hidden');
                     }
                 } else {
-                    variantContainer.style.display = 'none';
+                    variantContainer.classList.add('hidden');
                     variantSelect.required = false;
                 }
             }
@@ -321,18 +375,9 @@
         }
 
         addItemBtn.addEventListener('click', function() {
-            // Replace placeholder
             const content = rowTemplate.innerHTML.replace(/INDEX/g, rowIndex++);
-            
-            // Insert cleanly
-            // Note: rowTemplate.innerHTML contains <tr>...</tr>, so we need to append a TR, but the template content usually HAS the tr tag itself or is inner content?
-            // Checking previous code: <template id="itemRowTemplate"><tr class="item-row">...</tr></template>
-            // So innerHTML is the TR itself.
-            // But we cannot just append string to tbody. We need `insertAdjacentHTML` or generic element creation.
-            
             itemsBody.insertAdjacentHTML('beforeend', content);
             
-            // Re-initialize icons for new content
             if (typeof feather !== 'undefined') feather.replace();
             
             checkEmptyState();

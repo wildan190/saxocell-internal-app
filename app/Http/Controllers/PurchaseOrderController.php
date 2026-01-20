@@ -70,11 +70,34 @@ class PurchaseOrderController extends Controller
             ]);
             
             // Create PO items
+            // Create PO items
             foreach ($data['items'] as $item) {
+                // If Manual/Ad-hoc, product_id might be null or "on" (if checkbox value? no, product_id is select)
+                // If checkbox is on, we ignore product_id and use item_name.
+                
+                $productId = null;
+                $productVariantId = null;
+                $itemName = null;
+                
+                if (isset($item['is_manual']) && $item['is_manual'] == '1') {
+                    // Manual Mode
+                    $itemName = $item['item_name'];
+                } else {
+                    // Catalog Mode
+                    $productId = $item['product_id'];
+                    $productVariantId = $item['product_variant_id'] ?? null;
+                    // Optional: Save product name as item_name for consistency?
+                    // $product = Product::find($productId);
+                    // $itemName = $product->name; 
+                }
+
                 $itemSubtotal = $item['quantity_ordered'] * $item['unit_price'];
+
                 $po->items()->create([
-                    'product_id' => $item['product_id'],
-                    'product_variant_id' => $item['product_variant_id'] ?? null,
+                    'product_id' => $productId,
+                    'product_variant_id' => $productVariantId,
+                    'item_name' => $itemName,
+                    'description' => $item['description'] ?? null,
                     'quantity_ordered' => $item['quantity_ordered'],
                     'unit_price' => $item['unit_price'],
                     'tax_rate' => $item['tax_rate'] ?? 0,
