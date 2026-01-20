@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard - ' . config('app.name', 'Laravel'))
-
-@section('page-title', 'Dashboard')
+@section('title', 'Dashboard')
 
 @section('breadcrumb')
 <nav class="breadcrumb">
@@ -10,221 +8,177 @@
         <i data-feather="home"></i>
         <span>Home</span>
     </div>
-    <div class="breadcrumb-separator">
-        <i data-feather="chevron-right"></i>
-    </div>
-    <div class="breadcrumb-item active">
-        <span>Dashboard</span>
-    </div>
+    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
+    <div class="breadcrumb-item active">Dashboard</div>
 </nav>
 @endsection
 
 @section('content')
-<div class="welcome-section">
-    <h1 class="welcome-title">Welcome back, {{ Auth::user()->name }}!</h1>
-    <p class="welcome-subtitle">Here's what's happening with your account today.</p>
-</div>
-
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-title">Total Products</div>
-        <div class="stat-value">1,234</div>
-        <div class="stat-description">Active products in catalog</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-title">Revenue</div>
-        <div class="stat-value">$12,345</div>
-        <div class="stat-description">This month's earnings</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-title">Orders</div>
-        <div class="stat-value">567</div>
-        <div class="stat-description">Completed this week</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-title">Growth</div>
-        <div class="stat-value">+23%</div>
-        <div class="stat-description">Compared to last month</div>
-    </div>
-</div>
-
-<div class="recent-activity">
-    <h2 class="activity-title">Recent Activity</h2>
-    <div class="activity-item">
-        <div class="activity-icon">L</div>
-        <div class="activity-content">
-            <div class="activity-text">You logged in to your account</div>
-            <div class="activity-time">2 minutes ago</div>
+<div class="content-wrapper">
+    <!-- Welcome Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Welcome back, {{ Auth::user()->name }}!</h1>
+            <p class="page-subtitle">Here's what's happening with your inventory today.</p>
+        </div>
+        <div class="action-bar-header">
+            <span class="text-sm font-medium text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+                <i data-feather="calendar" class="w-4 h-4 inline-block mr-1 mb-0.5"></i>
+                {{ now()->format('l, d F Y') }}
+            </span>
         </div>
     </div>
-    <div class="activity-item">
-        <div class="activity-icon">P</div>
-        <div class="activity-content">
-            <div class="activity-text">Product catalog updated</div>
-            <div class="activity-time">1 hour ago</div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Products -->
+        <div class="card p-6 border-b-4 border-b-blue-500">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Products</p>
+                    <h3 class="text-2xl font-bold text-slate-800">{{ \App\Models\Product::count() ?? '0' }}</h3>
+                </div>
+                <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                    <i data-feather="package" class="w-5 h-5"></i>
+                </div>
+            </div>
+            <div class="text-xs text-slate-500">
+                Active items in catalog
+            </div>
+        </div>
+
+        <!-- Total Warehouses -->
+        <div class="card p-6 border-b-4 border-b-emerald-500">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Warehouses</p>
+                    <h3 class="text-2xl font-bold text-slate-800">{{ \App\Models\Warehouse::count() ?? '0' }}</h3>
+                </div>
+                <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                    <i data-feather="archive" class="w-5 h-5"></i>
+                </div>
+            </div>
+            <div class="text-xs text-slate-500">
+                Storage locations
+            </div>
+        </div>
+
+        <!-- Total Stores -->
+        <div class="card p-6 border-b-4 border-b-violet-500">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Stores</p>
+                    <h3 class="text-2xl font-bold text-slate-800">{{ \App\Models\Store::count() ?? '0' }}</h3>
+                </div>
+                <div class="p-2 bg-violet-50 text-violet-600 rounded-lg">
+                    <i data-feather="shopping-bag" class="w-5 h-5"></i>
+                </div>
+            </div>
+            <div class="text-xs text-slate-500">
+                Retail outlets
+            </div>
+        </div>
+
+        <!-- Pending Requests -->
+        <div class="card p-6 border-b-4 border-b-amber-500">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Pending Requests</p>
+                    <h3 class="text-2xl font-bold text-slate-800">
+                        {{ \App\Models\StockTransfer::where('status', 'requested')->count() ?? '0' }}
+                    </h3>
+                </div>
+                <div class="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                    <i data-feather="clock" class="w-5 h-5"></i>
+                </div>
+            </div>
+            <div class="text-xs text-slate-500">
+                Awaiting approval
+            </div>
         </div>
     </div>
-    <div class="activity-item">
-        <div class="activity-icon">S</div>
-        <div class="activity-content">
-            <div class="activity-text">Security settings changed</div>
-            <div class="activity-time">2 days ago</div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Quick Actions -->
+        <div class="lg:col-span-2">
+            <div class="card h-full">
+                <div class="card-header border-b border-slate-100 p-6 flex justify-between items-center">
+                    <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                        <i data-feather="zap" class="w-5 h-5 text-amber-500"></i>
+                        Quick Actions
+                    </h3>
+                </div>
+                <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <a href="{{ route('stock-transfers.create') }}" class="group p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all flex items-start gap-4">
+                        <div class="p-3 bg-blue-100 text-blue-600 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                            <i data-feather="truck" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 group-hover:text-blue-700">New Transfer</h4>
+                            <p class="text-xs text-slate-500 mt-1">Move stock between locations</p>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('stock-transfers.create-request') }}" class="group p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 transition-all flex items-start gap-4">
+                        <div class="p-3 bg-emerald-100 text-emerald-600 rounded-lg group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                            <i data-feather="download" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 group-hover:text-emerald-700">Request Stock</h4>
+                            <p class="text-xs text-slate-500 mt-1">Resupply your store</p>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('stock-opnames.create') }}" class="group p-4 rounded-xl border border-slate-200 hover:border-violet-500 hover:bg-violet-50 transition-all flex items-start gap-4">
+                        <div class="p-3 bg-violet-100 text-violet-600 rounded-lg group-hover:bg-violet-500 group-hover:text-white transition-colors">
+                            <i data-feather="check-square" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 group-hover:text-violet-700">Stock Opname</h4>
+                            <p class="text-xs text-slate-500 mt-1">Start stock counting session</p>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('products.index') }}" class="group p-4 rounded-xl border border-slate-200 hover:border-slate-500 hover:bg-slate-50 transition-all flex items-start gap-4">
+                        <div class="p-3 bg-slate-100 text-slate-600 rounded-lg group-hover:bg-slate-500 group-hover:text-white transition-colors">
+                            <i data-feather="package" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 group-hover:text-slate-700">Product Catalog</h4>
+                            <p class="text-xs text-slate-500 mt-1">Manage items & prices</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="lg:col-span-1">
+            <div class="card h-full">
+                <div class="card-header border-b border-slate-100 p-6">
+                    <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                        <i data-feather="activity" class="w-5 h-5 text-blue-500"></i>
+                        Recent Activity
+                    </h3>
+                </div>
+                <div class="p-0">
+                    <div class="divide-y divide-slate-50">
+                        <!-- Mock Data - Ideally this should come from an ActivityLog model -->
+                        <div class="p-4 hover:bg-slate-50 transition-colors flex gap-3">
+                            <div class="w-2 h-2 mt-2 rounded-full bg-blue-500 shrink-0"></div>
+                            <div>
+                                <p class="text-sm font-medium text-slate-800">System Login</p>
+                                <p class="text-xs text-slate-500 mt-0.5">You logged in successfully.</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Just now</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 text-center border-t border-slate-50 bg-slate-50/50 rounded-b-2xl">
+                        <a href="#" class="text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest">View All Logs</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-<style>
-    .welcome-section {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        padding: 3rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(148, 163, 184, 0.2);
-    }
-
-    .welcome-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 1rem;
-    }
-
-    .welcome-subtitle {
-        font-size: 1.125rem;
-        color: #64748b;
-        margin-bottom: 0;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    }
-
-    .stat-title {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-description {
-        font-size: 0.875rem;
-        color: #64748b;
-    }
-
-    .recent-activity {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(148, 163, 184, 0.2);
-    }
-
-    .activity-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 1rem;
-    }
-
-    .activity-item {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-
-    .activity-icon {
-        width: 2.5rem;
-        height: 2.5rem;
-        background: #3b82f6;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        color: white;
-        font-weight: 600;
-    }
-
-    .activity-content {
-        flex: 1;
-    }
-
-    .activity-text {
-        font-size: 0.875rem;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
-    }
-
-    .activity-time {
-        font-size: 0.75rem;
-        color: #64748b;
-    }
-
-    @media (max-width: 768px) {
-        .welcome-section {
-            padding: 2rem;
-        }
-
-        .welcome-title {
-            font-size: 1.75rem;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .stat-card {
-            padding: 1.5rem;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .welcome-title {
-            font-size: 1.5rem;
-        }
-
-        .stat-value {
-            font-size: 1.25rem;
-        }
-    }
-</style>
 @endsection

@@ -127,7 +127,7 @@
                 <div>
                     <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Recent Movements</h4>
                     <div class="space-y-0">
-                        @foreach($product->transactions()->latest()->take(5)->get() as $transaction)
+                        @foreach($product->inventoryTransactions()->latest()->take(5)->get() as $transaction)
                         <div class="flex items-center gap-3 p-3 border-b border-slate-50 last:border-0">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center 
                                 {{ $transaction->type == 'in' ? 'bg-green-100 text-green-600' : 

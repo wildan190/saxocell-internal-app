@@ -99,7 +99,7 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="{{ route('stock-transfers.index') }}" class="nav-link {{ request()->routeIs('stock-transfers.*') ? 'active' : '' }}">
+                    <a href="{{ route('stock-transfers.index') }}" class="nav-link {{ (request()->routeIs('stock-transfers.*') && !request()->routeIs('stock-transfers.create-request')) ? 'active' : '' }}">
                         <i data-feather="truck" class="nav-icon"></i>
                         Stock Transfers
                     </a>
@@ -218,6 +218,39 @@
             // Initial setup
             handleResize();
             isInitialized = true;
+
+            // Dropdown functionality
+            document.addEventListener('click', function(e) {
+                const toggle = e.target.closest('.dropdown-toggle');
+                const menu = e.target.closest('.dropdown-menu');
+
+                // If clicking a toggle
+                if (toggle) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const currentMenu = toggle.nextElementSibling;
+                    const isHidden = currentMenu.classList.contains('hidden');
+
+                    // Close all other dropdowns
+                    document.querySelectorAll('.dropdown-menu').forEach(m => {
+                        if (m !== currentMenu) m.classList.add('hidden');
+                    });
+
+                    // Toggle current
+                    if (isHidden) {
+                        currentMenu.classList.remove('hidden');
+                    } else {
+                        currentMenu.classList.add('hidden');
+                    }
+                } 
+                // If clicking outside
+                else if (!menu) {
+                    document.querySelectorAll('.dropdown-menu').forEach(m => {
+                        m.classList.add('hidden');
+                    });
+                }
+            });
         });
 
     </script>
