@@ -98,6 +98,7 @@ class PurchaseOrderController extends Controller
                     'product_variant_id' => $productVariantId,
                     'item_name' => $itemName,
                     'description' => $item['description'] ?? null,
+                    'category' => $item['category'] ?? 'new',
                     'quantity_ordered' => $item['quantity_ordered'],
                     'unit_price' => $item['unit_price'],
                     'tax_rate' => $item['tax_rate'] ?? 0,

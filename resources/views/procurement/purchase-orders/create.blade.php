@@ -188,6 +188,14 @@
                 <div>
                    <input type="text" name="items[INDEX][description]" class="form-control text-xs text-slate-500 w-full border-slate-200 rounded bg-slate-50 placeholder-slate-400" placeholder="Additional Details / Description...">
                 </div>
+
+                <!-- Category (Common) -->
+                <div>
+                    <select name="items[INDEX][category]" class="form-select text-xs w-full border-slate-200 rounded bg-white" required>
+                        <option value="new">New</option>
+                        <option value="used">Used</option>
+                    </select>
+                </div>
             </div>
         </td>
         <td class="p-3">
