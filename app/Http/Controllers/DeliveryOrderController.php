@@ -66,7 +66,7 @@ class DeliveryOrderController extends Controller
                         'sku' => $generatedSku, 
                         'description' => $poItem->description ?? 'Auto-created from PO ' . $po->po_number,
                         'price' => $poItem->unit_price,
-                        'category' => 'new',
+                        'category' => $poItem->category ?? 'new',
                         'status' => 'active',
                         'stock_quantity' => 0,
                     ]);
