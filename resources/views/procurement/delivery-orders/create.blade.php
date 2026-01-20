@@ -192,7 +192,7 @@
                             <th style="text-align: center; width: 12%;">Pending</th>
                             <th style="width: 14%;">Accepted</th>
                             <th style="width: 14%;">Rejected</th>
-                            <th>Discrepancy Notes</th>
+                            <th>Notes / Reason</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -221,13 +221,20 @@
                                 <span class="badge" style="background: #f1f5f9; color: #475569; font-weight: 800;">{{ $item->remaining_quantity }} units</span>
                             </td>
                             <td>
-                                <input type="number" name="items[{{ $index }}][quantity_accepted]" class="form-control" min="0" max="{{ $item->remaining_quantity }}" value="{{ $item->remaining_quantity }}" required>
+                                <input type="number" name="items[{{ $index }}][quantity_accepted]" class="form-control qty-accepted" data-index="{{ $index }}" data-max="{{ $item->remaining_quantity }}" min="0" max="{{ $item->remaining_quantity }}" value="{{ $item->remaining_quantity }}" required>
                             </td>
                             <td>
-                                <input type="number" name="items[{{ $index }}][quantity_rejected]" class="form-control" min="0" max="{{ $item->remaining_quantity }}" value="0" required>
+                                <input type="number" name="items[{{ $index }}][quantity_rejected]" class="form-control qty-rejected" data-index="{{ $index }}" data-max="{{ $item->remaining_quantity }}" min="0" max="{{ $item->remaining_quantity }}" value="0" required>
+                                <div class="resolution-container-{{ $index }} mt-2" style="display: none;">
+                                    <select name="items[{{ $index }}][resolution_type]" class="form-select text-xs">
+                                        <option value="">-- Resolution --</option>
+                                        <option value="refund">Request Refund</option>
+                                        <option value="replacement">Request Replacement</option>
+                                    </select>
+                                </div>
                             </td>
                             <td>
-                                <input type="text" name="items[{{ $index }}][condition_notes]" class="form-control" placeholder="Optional notes...">
+                                <input type="text" name="items[{{ $index }}][rejection_reason]" class="form-control" placeholder="Reason/Notes...">
                             </td>
                         </tr>
                         @endif
@@ -249,3 +256,62 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const qtyAcceptedInputs = document.querySelectorAll('.qty-accepted');
+    const qtyRejectedInputs = document.querySelectorAll('.qty-rejected');
+
+    function updateQuantities(input, type) {
+        const index = input.dataset.index;
+        const max = parseInt(input.dataset.max);
+        const val = parseInt(input.value) || 0;
+        
+        const otherInput = type === 'accepted' 
+            ? document.querySelector(`.qty-rejected[data-index="${index}"]`)
+            : document.querySelector(`.qty-accepted[data-index="${index}"]`);
+            
+        // Ensure we don't exceed total remaining
+        if (val > max) {
+            input.value = max;
+            otherInput.value = 0;
+        } else {
+            otherInput.value = max - val;
+        }
+
+        // Toggle Resolution Visibility
+        const rejectedVal = parseInt(document.querySelector(`.qty-rejected[data-index="${index}"]`).value) || 0;
+        const resolutionContainer = document.querySelector(`.resolution-container-${index}`);
+        if (rejectedVal > 0) {
+            resolutionContainer.style.display = 'block';
+            resolutionContainer.querySelector('select').required = true;
+        } else {
+            resolutionContainer.style.display = 'none';
+            resolutionContainer.querySelector('select').required = false;
+        }
+    }
+
+    qtyAcceptedInputs.forEach(input => {
+        input.addEventListener('input', () => updateQuantities(input, 'accepted'));
+    });
+
+    qtyRejectedInputs.forEach(input => {
+        input.addEventListener('input', () => updateQuantities(input, 'rejected'));
+        // Initial setup for existing values
+        if (parseInt(input.value) > 0) {
+            const index = input.dataset.index;
+            const container = document.querySelector(`.resolution-container-${index}`);
+            if (container) {
+                container.style.display = 'block';
+                container.querySelector('select').required = true;
+            }
+        }
+    });
+
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+});
+</script>
+@endpush

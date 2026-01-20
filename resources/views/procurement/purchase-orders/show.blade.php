@@ -220,7 +220,62 @@
         </div>
     </div>
     @endif
+
+    @php
+        $pendingResolutions = \App\Models\RejectedItem::whereHas('deliveryOrder', function($q) use ($po) {
+            $q->where('purchase_order_id', $po->id);
+        })->where(function($q) {
+            $q->where('resolution_type', 'replacement')
+              ->whereColumn('replacement_received_quantity', '<', 'quantity_rejected')
+              ->orWhere('resolution_type', 'refund');
+        })->get();
+    @endphp
+
+    @if($pendingResolutions->count() > 0)
+    <div class="mt-12 p-8 bg-amber-50/50 border border-amber-100 rounded-[2rem]">
+        <h3 class="text-xl font-extrabold text-amber-900 mb-6 flex items-center gap-3">
+            <span class="p-2 bg-amber-100 rounded-lg text-amber-600"><i data-feather="alert-triangle" class="w-5 h-5"></i></span>
+            Pending Resolutions
+        </h3>
+        
+        <div class="grid grid-cols-1 gap-4">
+            @foreach($pendingResolutions as $resolution)
+            <div class="bg-white p-6 rounded-2xl border border-amber-200/60 shadow-sm flex items-center justify-between">
+                <div>
+                    <div class="font-bold text-slate-800">
+                        {{ $resolution->purchaseOrderItem->product ? $resolution->purchaseOrderItem->product->name : $resolution->purchaseOrderItem->item_name }}
+                    </div>
+                    <div class="text-xs text-slate-500 mt-1">
+                        From DO: <strong>{{ $resolution->deliveryOrder->do_number }}</strong> • 
+                        Reason: <i>{{ $resolution->rejection_reason ?: 'No specific reason given' }}</i>
+                    </div>
+                </div>
+                <div class="text-right">
+                    @if($resolution->resolution_type == 'replacement')
+                        @php $remaining = $resolution->quantity_rejected - $resolution->replacement_received_quantity; @endphp
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase tracking-widest">
+                            Replacement: {{ $remaining }} / {{ $resolution->quantity_rejected }} units pending
+                        </span>
+                    @else
+                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-[10px] font-black uppercase tracking-widest">
+                            Refund Requested: {{ $resolution->quantity_rejected }} units
+                        </span>
+                    @endif
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
+
+@push('scripts')
+<script>
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+</script>
+@endpush
 
 <style>
     @media print {

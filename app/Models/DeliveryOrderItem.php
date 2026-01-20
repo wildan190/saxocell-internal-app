@@ -20,6 +20,8 @@ class DeliveryOrderItem extends Model
         'quantity_accepted',
         'quantity_rejected',
         'condition_notes',
+        'rejection_reason',
+        'resolution_type',
     ];
 
     protected $casts = [
