@@ -136,7 +136,18 @@
                                 {{ $item->quantity_rejected }}
                             </td>
                             <td class="px-6 py-5">
-                                <span class="text-xs font-medium text-slate-500">{{ $item->condition_notes ?: 'Nominal condition verified' }}</span>
+                                <span class="text-xs font-medium text-slate-500">
+                                    {{ $item->rejection_reason ?: ($item->condition_notes ?: 'Nominal condition verified') }}
+                                </span>
+                                @if($item->quantity_rejected > 0 && $item->resolution_type)
+                                    <div class="mt-2">
+                                        @if($item->resolution_type == 'refund')
+                                            <span class="px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-tighter">Refund Requested</span>
+                                        @elseif($item->resolution_type == 'replacement')
+                                            <span class="px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-tighter">Replacement Expected</span>
+                                        @endif
+                                    </div>
+                                @endif
                             </td>
                         </tr>
                         @endforeach

@@ -22,7 +22,8 @@ class StoreDeliveryOrderRequest extends FormRequest
             'items.*.purchase_order_item_id' => 'required|exists:purchase_order_items,id',
             'items.*.quantity_accepted' => 'required|integer|min:0',
             'items.*.quantity_rejected' => 'required|integer|min:0',
-            'items.*.condition_notes' => 'nullable|string',
+            'items.*.rejection_reason' => 'nullable|string',
+            'items.*.resolution_type' => 'required_unless:items.*.quantity_rejected,0|nullable|in:refund,replacement',
         ];
     }
 }

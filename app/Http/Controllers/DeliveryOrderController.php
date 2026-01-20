@@ -87,7 +87,7 @@ class DeliveryOrderController extends Controller
                 }
                 
                 // Create DO Item
-                $do->items()->create([
+                $doItem = $do->items()->create([
                     'purchase_order_item_id' => $poItem->id,
                     'product_id' => $poItem->product_id,
                     'product_variant_id' => $poItem->product_variant_id,
@@ -95,7 +95,39 @@ class DeliveryOrderController extends Controller
                     'quantity_accepted' => $itemData['quantity_accepted'],
                     'quantity_rejected' => $itemData['quantity_rejected'],
                     'condition_notes' => $itemData['condition_notes'] ?? null,
+                    'rejection_reason' => $itemData['rejection_reason'] ?? null,
+                    'resolution_type' => $itemData['quantity_rejected'] > 0 ? ($itemData['resolution_type'] ?? null) : null,
                 ]);
+
+                // Handle Rejection Resolution
+                if ($itemData['quantity_rejected'] > 0 && isset($itemData['resolution_type'])) {
+                    \App\Models\RejectedItem::create([
+                        'delivery_order_id' => $do->id,
+                        'purchase_order_item_id' => $poItem->id,
+                        'quantity_rejected' => $itemData['quantity_rejected'],
+                        'rejection_reason' => $itemData['rejection_reason'] ?? null,
+                        'resolution_type' => $itemData['resolution_type'],
+                        'replacement_received_quantity' => 0,
+                    ]);
+                }
+
+                // If this delivery fulfills a prior replacement request
+                $pendingReplacements = \App\Models\RejectedItem::where('purchase_order_item_id', $poItem->id)
+                    ->where('resolution_type', 'replacement')
+                    ->whereColumn('replacement_received_quantity', '<', 'quantity_rejected')
+                    ->orderBy('created_at', 'asc')
+                    ->get();
+
+                $remainingAccepted = $itemData['quantity_accepted'];
+                foreach ($pendingReplacements as $rejectedItem) {
+                    if ($remainingAccepted <= 0) break;
+                    
+                    $needed = $rejectedItem->quantity_rejected - $rejectedItem->replacement_received_quantity;
+                    $fulfilled = min($remainingAccepted, $needed);
+                    
+                    $rejectedItem->increment('replacement_received_quantity', $fulfilled);
+                    $remainingAccepted -= $fulfilled;
+                }
                 
                 // Update PO Item quantity_received
                 $poItem->increment('quantity_received', $itemData['quantity_accepted']);
@@ -129,17 +161,13 @@ class DeliveryOrderController extends Controller
                         $poItem->product->increment('stock_quantity', $itemData['quantity_accepted']);
                     }
                 }
-                
-                if ($poItem->quantity_received < $poItem->quantity_ordered) {
-                    $allReceived = false;
-                }
             }
             
-            // Update PO Status
-            $po->update(['status' => $allReceived ? 'completed' : 'partial']);
+            // Update PO Status using new helper
+            $po->update(['status' => $po->isFullyResolved() ? 'completed' : 'partial']);
             
             DB::commit();
-            return redirect()->route('delivery-orders.index')->with('success', 'Goods received and inventory updated in selected warehouse.');
+            return redirect()->route('delivery-orders.index')->with('success', 'Goods received and inventory updated. PO status: ' . strtoupper($po->status));
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to record delivery: ' . $e->getMessage())->withInput();

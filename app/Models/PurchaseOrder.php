@@ -85,4 +85,42 @@ class PurchaseOrder extends Model
         $number = $latest ? intval(substr($latest->po_number, 3)) + 1 : 1;
         return 'PO-' . str_pad($number, 6, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Check if there are any pending replacements for rejected items.
+     */
+    public function hasPendingReplacements(): bool
+    {
+        return RejectedItem::whereHas('deliveryOrder', function ($query) {
+            $query->where('purchase_order_id', $this->id);
+        })->where('resolution_type', 'replacement')
+          ->whereColumn('replacement_received_quantity', '<', 'quantity_rejected')
+          ->exists();
+    }
+
+    /**
+     * Check if all items in the PO are fully resolved (received or refunded).
+     */
+    public function isFullyResolved(): bool
+    {
+        foreach ($this->items as $item) {
+            $receivedCount = $item->quantity_received;
+            
+            // Get refund count for this item
+            $refundCount = RejectedItem::where('purchase_order_item_id', $item->id)
+                ->where('resolution_type', 'refund')
+                ->sum('quantity_rejected');
+
+            if (($receivedCount + $refundCount) < $item->quantity_ordered) {
+                return false;
+            }
+        }
+
+        // Also check if any replacement is still pending
+        if ($this->hasPendingReplacements()) {
+            return false;
+        }
+
+        return true;
+    }
 }
