@@ -26,7 +26,17 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $products = $this->productRepository->getAll($request->all());
-        return view('products.index', compact('products'));
+        $needsReviewCount = Product::needsReview()->count();
+        return view('products.index', compact('products', 'needsReviewCount'));
+    }
+
+    /**
+     * Display products that need price review.
+     */
+    public function needsReview()
+    {
+        $products = Product::needsReview()->latest()->paginate(20);
+        return view('products.needs-review', compact('products'));
     }
 
     /**

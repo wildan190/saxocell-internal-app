@@ -61,14 +61,19 @@ class DeliveryOrderController extends Controller
                 // Auto-create Product if Ad-hoc item
                 if (!$poItem->product_id && $poItem->item_name) {
                     $generatedSku = 'GEN-' . strtoupper(uniqid());
+                    $costPrice = $poItem->unit_price;
+                    $suggestedPrice = $costPrice * 1.2; // 20% markup as placeholder
+                    
                     $newProduct = \App\Models\Product::create([
                         'name' => $poItem->item_name,
                         'sku' => $generatedSku, 
-                        'description' => $poItem->description ?? 'Auto-created from PO ' . $po->po_number,
-                        'price' => $poItem->unit_price,
+                        'description' => ($poItem->description ?? '') . ' (Auto-created - Price needs review)',
+                        'price' => $suggestedPrice,
+                        'cost_price' => $costPrice,
                         'category' => $poItem->category ?? 'new',
                         'status' => 'active',
                         'stock_quantity' => 0,
+                        'needs_price_review' => true,
                     ]);
 
                     // Link PO Item to new Product to prevent re-creation
