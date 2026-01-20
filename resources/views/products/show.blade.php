@@ -76,98 +76,77 @@
     </div>
     @endif
 
-    <div class="product-inventory">
-        <h3 class="section-title">
-            <i data-feather="package"></i>
-            Inventory & Variants
-        </h3>
-
-        @if($product->hasVariants())
-            <div class="variants-section">
-                <div class="inventory-summary">
-                    <div class="summary-item">
-                        <div class="summary-label">Total Variants</div>
-                        <div class="summary-value">{{ $product->variants->count() }}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Total Stock</div>
-                        <div class="summary-value">{{ $product->total_stock }}</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Price Range</div>
-                        <div class="summary-value">
-                            @if($product->price_range)
-                                Rp {{ number_format($product->price_range['min'], 0, ',', '.') }} - Rp {{ number_format($product->price_range['max'], 0, ',', '.') }}
-                            @else
-                                Rp {{ number_format($product->effective_price, 0, ',', '.') }}
-                            @endif
-                        </div>
-                    </div>
+    <div class="product-inventory mb-8">
+        <x-card header="Inventory Overview">
+            <x-slot:headerActions>
+                <div class="flex gap-2">
+                    <x-badge type="{{ $product->isInStock() ? 'success' : 'danger' }}">
+                        {{ $product->stock_quantity }} Total Stock
+                    </x-badge>
                 </div>
+            </x-slot:headerActions>
 
-                <div class="variants-grid">
-                    @foreach($product->activeVariants as $variant)
-                    <div class="variant-card {{ $variant->is_default ? 'default-variant' : '' }}">
-                        @if($variant->image)
-                            <div class="variant-image">
-                                <img src="{{ asset('storage/' . $variant->image) }}" alt="{{ $variant->name }}">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Global Stock Info -->
+                <div>
+                    <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Stock Distribution</h4>
+                    <div class="space-y-4">
+                        <!-- Warehouses -->
+                        @foreach($product->warehouseInventory as $inv)
+                            @if($inv->quantity > 0)
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                <span class="font-medium text-slate-700">
+                                    <i data-feather="box" class="w-4 h-4 inline mr-2 text-blue-500"></i>
+                                    {{ $inv->warehouse->name }}
+                                </span>
+                                <span class="font-bold text-slate-900">{{ $inv->quantity }}</span>
                             </div>
-                        @else
-                            <div class="variant-image-placeholder">
-                                <i data-feather="image"></i>
+                            @endif
+                        @endforeach
+
+                        <!-- Stores -->
+                        @foreach($product->storeInventory as $inv)
+                            @if($inv->quantity > 0)
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                <span class="font-medium text-slate-700">
+                                    <i data-feather="shopping-bag" class="w-4 h-4 inline mr-2 text-green-500"></i>
+                                    {{ $inv->store->name }}
+                                </span>
+                                <span class="font-bold text-slate-900">{{ $inv->quantity }}</span>
                             </div>
+                            @endif
+                        @endforeach
+                        
+                        @if($product->warehouseInventory->where('quantity', '>', 0)->isEmpty() && $product->storeInventory->where('quantity', '>', 0)->isEmpty())
+                            <div class="text-center py-4 text-slate-400 italic">No stock distributed in warehouses or stores.</div>
                         @endif
+                    </div>
+                </div>
 
-                        <div class="variant-info">
-                            <h4 class="variant-name">{{ $variant->name }}</h4>
-                            @if($variant->attributes_summary)
-                                <div class="variant-attributes">{{ $variant->attributes_summary }}</div>
-                            @endif
-                            <div class="variant-details">
-                                <div class="variant-price">
-                                    @if($variant->price)
-                                        Rp {{ number_format($variant->price, 0, ',', '.') }}
-                                    @else
-                                        Rp {{ number_format($product->price, 0, ',', '.') }}
-                                    @endif
-                                </div>
-                                <div class="variant-stock">
-                                    <span class="stock-badge {{ $variant->isInStock() ? 'in-stock' : 'out-of-stock' }}">
-                                        {{ $variant->stock_quantity }} in stock
-                                    </span>
-                                </div>
+                <!-- Recent Movements -->
+                <div>
+                    <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Recent Movements</h4>
+                    <div class="space-y-0">
+                        @foreach($product->inventoryTransactions()->latest()->take(5)->get() as $transaction)
+                        <div class="flex items-center gap-3 p-3 border-b border-slate-50 last:border-0">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center 
+                                {{ $transaction->type == 'in' ? 'bg-green-100 text-green-600' : 
+                                   ($transaction->type == 'out' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600') }}">
+                                <i data-feather="{{ $transaction->type == 'in' ? 'arrow-down-left' : ($transaction->type == 'out' ? 'arrow-up-right' : 'refresh-cw') }}" class="w-4 h-4"></i>
                             </div>
-                            @if($variant->sku)
-                                <div class="variant-sku">SKU: {{ $variant->sku }}</div>
-                            @endif
-                            @if($variant->is_default)
-                                <div class="default-badge">Default Variant</div>
-                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-900 truncate">{{ $transaction->notes }}</p>
+                                <p class="text-xs text-slate-500">{{ $transaction->created_at->diffForHumans() }}</p>
+                            </div>
+                            <div class="text-sm font-bold {{ $transaction->type == 'in' ? 'text-green-600' : ($transaction->type == 'out' ? 'text-red-600' : 'text-slate-700') }}">
+                                {{ $transaction->type == 'out' ? '-' : '+' }}{{ abs($transaction->quantity) }}
+                            </div>
                         </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-        @else
-            <div class="inventory-summary">
-                <div class="summary-item">
-                    <div class="summary-label">SKU</div>
-                    <div class="summary-value">{{ $product->sku ?: 'Not set' }}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-label">Stock Quantity</div>
-                    <div class="summary-value">
-                        <span class="stock-badge {{ $product->isInStock() ? 'in-stock' : 'out-of-stock' }}">
-                            {{ $product->stock_quantity }}
-                        </span>
+                        @endforeach
                     </div>
                 </div>
-                <div class="summary-item">
-                    <div class="summary-label">Price</div>
-                    <div class="summary-value">Rp {{ number_format($product->price, 0, ',', '.') }}</div>
-                </div>
             </div>
-        @endif
+        </x-card>
     </div>
 
     <div class="product-metadata">

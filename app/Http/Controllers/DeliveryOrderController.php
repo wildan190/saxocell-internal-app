@@ -24,13 +24,13 @@ class DeliveryOrderController extends Controller
         $selectedPo = null;
         if ($request->filled('po_id')) {
             $selectedPo = PurchaseOrder::with('items.product', 'items.variant', 'supplier')
-                ->where('status', 'approved')
-                ->orWhere('status', 'partial')
+                ->whereIn('status', ['approved', 'partial'])
                 ->findOrFail($request->po_id);
         }
 
         $purchaseOrders = PurchaseOrder::whereIn('status', ['approved', 'partial'])->get();
-        return view('procurement.delivery-orders.create', compact('purchaseOrders', 'selectedPo'));
+        $warehouses = \App\Models\Warehouse::all();
+        return view('procurement.delivery-orders.create', compact('purchaseOrders', 'selectedPo', 'warehouses'));
     }
 
     public function store(StoreDeliveryOrderRequest $request)
@@ -57,6 +57,29 @@ class DeliveryOrderController extends Controller
                 $qtyDelivered = $itemData['quantity_accepted'] + $itemData['quantity_rejected'];
                 
                 if ($qtyDelivered <= 0) continue;
+
+                // Auto-create Product if Ad-hoc item
+                if (!$poItem->product_id && $poItem->item_name) {
+                    $generatedSku = 'GEN-' . strtoupper(uniqid());
+                    $newProduct = \App\Models\Product::create([
+                        'name' => $poItem->item_name,
+                        'sku' => $generatedSku, 
+                        'description' => $poItem->description ?? 'Auto-created from PO ' . $po->po_number,
+                        'price' => $poItem->unit_price,
+                        'category' => 'new',
+                        'status' => 'active',
+                        'stock_quantity' => 0,
+                    ]);
+
+                    // Link PO Item to new Product to prevent re-creation
+                    $poItem->update([
+                        'product_id' => $newProduct->id,
+                        'product_variant_id' => null // Ensure variant is null
+                    ]);
+                    
+                    // Refresh local instance
+                    $poItem->product_id = $newProduct->id;
+                }
                 
                 // Create DO Item
                 $do->items()->create([
@@ -78,13 +101,23 @@ class DeliveryOrderController extends Controller
                         'product_id' => $poItem->product_id,
                         'product_variant_id' => $poItem->product_variant_id,
                         'supplier_id' => $po->supplier_id,
+                        'warehouse_id' => $data['warehouse_id'] ?? null,
                         'type' => 'in',
                         'quantity' => $itemData['quantity_accepted'],
                         'reference_number' => $do->do_number,
                         'notes' => "Received from PO: {$po->po_number}",
                     ]);
                     
-                    // Update Product/Variant Stock
+                    // Update Warehouse Inventory (New Logic)
+                    if (isset($data['warehouse_id'])) {
+                        $whInv = \App\Models\WarehouseInventory::firstOrCreate([
+                            'warehouse_id' => $data['warehouse_id'],
+                            'product_id' => $poItem->product_id,
+                        ], ['quantity' => 0]);
+                        $whInv->increment('quantity', $itemData['quantity_accepted']);
+                    }
+
+                    // Update Product/Variant Stock (Global)
                     if ($poItem->product_variant_id) {
                         $poItem->variant->increment('stock_quantity', $itemData['quantity_accepted']);
                     } else {
@@ -101,7 +134,7 @@ class DeliveryOrderController extends Controller
             $po->update(['status' => $allReceived ? 'completed' : 'partial']);
             
             DB::commit();
-            return redirect()->route('delivery-orders.index')->with('success', 'Goods received and inventory updated.');
+            return redirect()->route('delivery-orders.index')->with('success', 'Goods received and inventory updated in selected warehouse.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to record delivery: ' . $e->getMessage())->withInput();

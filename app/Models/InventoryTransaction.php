@@ -14,6 +14,10 @@ class InventoryTransaction extends Model
         'product_id',
         'product_variant_id',
         'supplier_id',
+        'warehouse_id',
+        'store_id',
+        'stock_transfer_id',
+        'stock_opname_id',
         'type',
         'quantity',
         'reference_number',
@@ -46,6 +50,26 @@ class InventoryTransaction extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    public function transfer(): BelongsTo
+    {
+        return $this->belongsTo(StockTransfer::class, 'stock_transfer_id');
+    }
+
+    public function opname(): BelongsTo
+    {
+        return $this->belongsTo(StockOpname::class, 'stock_opname_id');
     }
 
     /**

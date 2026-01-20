@@ -136,7 +136,14 @@
                         <tr class="hover:bg-slate-50/30 transition-colors">
                             <td class="px-6 py-5">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-slate-800 leading-tight">{{ $item->product->name }}</span>
+                                    <span class="font-bold text-slate-800 leading-tight">
+                                        {{ $item->product ? $item->product->name : $item->item_name }}
+                                    </span>
+                                    @if($item->description)
+                                    <span class="text-[11px] font-medium text-slate-500 mt-1">
+                                        {{ $item->description }}
+                                    </span>
+                                    @endif
                                     @if($item->variant)
                                     <span class="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-wider">
                                         {{ $item->variant->attributes_summary }}

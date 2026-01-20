@@ -26,6 +26,46 @@
         </div>
     </div>
 
+    @if(session('error'))
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-start">
+            <i data-feather="alert-circle" class="w-5 h-5 text-red-500 mr-3 mt-0.5"></i>
+            <div>
+                <p class="font-bold text-red-800">Error</p>
+                <p class="text-sm text-red-700">{{ session('error') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if(session('success'))
+    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-start">
+            <i data-feather="check-circle" class="w-5 h-5 text-green-500 mr-3 mt-0.5"></i>
+            <div>
+                <p class="font-bold text-green-800">Success</p>
+                <p class="text-sm text-green-700">{{ session('success') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($errors->any())
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
+        <div class="flex items-start">
+            <i data-feather="alert-triangle" class="w-5 h-5 text-red-500 mr-3 mt-0.5"></i>
+            <div>
+                <p class="font-bold text-red-800">Validation Errors</p>
+                <ul class="list-disc list-inside text-sm text-red-700 mt-2">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    </div>
+    @endif
+
     @if(!$selectedPo)
     <div style="display: flex; justify-content: center; padding: 4rem 0;">
         <div class="card" style="width: 100%; max-width: 550px; text-align: center; background: white;">
@@ -41,7 +81,7 @@
                     <select name="po_id" class="form-select" onchange="this.form.submit()">
                         <option value="">Search PO Number or Supplier...</option>
                         @foreach($purchaseOrders as $po)
-                            <option value="{{ $po->id }}">
+                            <option value="{{ $po->id }}" {{ (isset($selectedPo) && $selectedPo->id == $po->id) ? 'selected' : '' }}>
                                 {{ $po->po_number }} — {{ $po->supplier->name }} ({{ strtoupper($po->status) }})
                             </option>
                         @endforeach
@@ -120,6 +160,23 @@
                     <textarea name="notes" class="form-control" rows="4" placeholder="Mention any global issues with this delivery..."></textarea>
                 </div>
             </div>
+            
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i data-feather="map-pin"></i>
+                    Destination Warehouse
+                </h3>
+                <div class="form-group">
+                    <label class="form-label">Receive Item Into</label>
+                    <select name="warehouse_id" class="form-select" required>
+                        <option value="">-- Select Warehouse --</option>
+                        @foreach($warehouses as $warehouse)
+                            <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
+                        @endforeach
+                    </select>
+                    <p class="text-xs text-slate-500 mt-2">All items accepted in this delivery will be added to this warehouse's inventory.</p>
+                </div>
+            </div>
         </div>
 
         <!-- line Items -->
@@ -144,7 +201,12 @@
                         <tr>
                             <td>
                                 <div style="display: flex; flex-direction: column;">
-                                    <span style="font-weight: 700; color: #1e293b;">{{ $item->product->name }}</span>
+                                    <span style="font-weight: 700; color: #1e293b;">
+                                        {{ $item->product ? $item->product->name : $item->item_name }}
+                                        @if($item->description)
+                                            <div class="text-xs text-slate-500 font-normal mt-1">{{ $item->description }}</div>
+                                        @endif
+                                    </span>
                                     @if($item->variant)
                                     <span style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">
                                         @foreach($item->variant->formatted_attributes as $k => $v)

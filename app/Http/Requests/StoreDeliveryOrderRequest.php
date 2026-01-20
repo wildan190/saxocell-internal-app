@@ -15,6 +15,7 @@ class StoreDeliveryOrderRequest extends FormRequest
     {
         return [
             'purchase_order_id' => 'required|exists:purchase_orders,id',
+            'warehouse_id' => 'required|exists:warehouses,id',
             'delivery_date' => 'required|date',
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
