@@ -10,7 +10,9 @@ Route::get('/', function () {
 });
 
 Route::get('/home', function () {
-    return view('home');
+    $needsReviewCount = \App\Models\Product::needsReview()->count();
+    $productsNeedingReview = \App\Models\Product::needsReview()->latest()->take(5)->get();
+    return view('home', compact('needsReviewCount', 'productsNeedingReview'));
 })->middleware(['auth'])->name('home');
 
 // Products Routes
