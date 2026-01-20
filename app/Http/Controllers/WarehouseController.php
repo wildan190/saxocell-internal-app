@@ -46,8 +46,16 @@ class WarehouseController extends Controller
      */
     public function show(Warehouse $warehouse)
     {
-        $warehouse->load('inventory.product');
-        return view('warehouses.show', compact('warehouse'));
+        $warehouse->load(['inventory.product']);
+        
+        $stats = [
+            'total_skus' => $warehouse->inventory->count(),
+            'low_stock' => $warehouse->inventory->where('quantity', '<=', 10)->count(), // Warehouses have higher low-stock threshold
+            'out_of_stock' => $warehouse->inventory->where('quantity', '<=', 0)->count(),
+            'total_items' => $warehouse->inventory->sum('quantity'),
+        ];
+
+        return view('warehouses.show', compact('warehouse', 'stats'));
     }
 
     /**
