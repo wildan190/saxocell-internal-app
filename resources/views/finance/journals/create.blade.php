@@ -6,7 +6,7 @@
 <div class="content-wrapper bg-slate-50/50 min-h-screen pb-20 font-sans">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
-            <h1 class="text-5xl font-black text-slate-900 tracking-tight">Manual Journal</h1>
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Manual Journal</h1>
             <p class="text-slate-500 mt-3 font-medium text-lg">Record custom adjustments to the general ledger.</p>
         </div>
         
@@ -19,7 +19,7 @@
 
     @if ($errors->any())
         <div class="mb-8 p-8 bg-rose-50 border-2 border-rose-100 rounded-[2.5rem] text-rose-700 animate-in fade-in slide-in-from-top-4 duration-500">
-            <h4 class="font-black text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h4 class="font-black text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
                 <i data-feather="alert-octagon" class="w-5 h-5"></i> Ledger Imbalance
             </h4>
             <ul class="text-sm font-bold flex flex-col gap-2">
@@ -37,11 +37,11 @@
             <div class="bg-white rounded-[3rem] border border-slate-200 shadow-xl p-12">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                     <div class="space-y-3">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Posting Date</label>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Posting Date</label>
                         <input type="date" name="entry_date" value="{{ date('Y-m-d') }}" class="w-full px-8 py-5 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 focus:bg-white rounded-2xl font-bold text-slate-800 transition-all outline-none shadow-sm" required>
                     </div>
                     <div class="space-y-3 lg:col-span-2">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Journal Description / Memo</label>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Journal Description / Memo</label>
                         <input type="text" name="description" placeholder="e.g. Monthly Rent Allocation January" class="w-full px-8 py-5 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 focus:bg-white rounded-2xl font-bold text-slate-800 transition-all outline-none shadow-sm" required>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
             <div class="bg-white rounded-[3rem] border border-slate-100 shadow-2xl overflow-hidden shadow-slate-200/50">
                 <div class="p-10 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <h3 class="text-2xl font-black text-slate-900">Journal Splits</h3>
-                    <button type="button" id="add-row" class="px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <button type="button" id="add-row" class="px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
                         <i data-feather="plus" class="w-4 h-4"></i> Add Account
                     </button>
                 </div>
@@ -60,7 +60,7 @@
                     @for($i=0; $i<2; $i++)
                     <div class="journal-row group flex flex-col lg:flex-row gap-6 p-8 bg-slate-50/50 hover:bg-white border-2 border-transparent hover:border-blue-100 rounded-[2.5rem] transition-all duration-500 relative">
                         <div class="flex-1 space-y-3">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">General Ledger Account</label>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-2">General Ledger Account</label>
                             <select name="items[{{$i}}][account_id]" class="account-select w-full px-8 py-5 bg-white border-2 border-slate-100 focus:border-blue-500 rounded-2xl font-bold text-slate-800 outline-none appearance-none shadow-sm transition-all" required>
                                 <option value="">-- Choose Account --</option>
                                 @foreach($accounts as $acc)
@@ -69,11 +69,11 @@
                             </select>
                         </div>
                         <div class="lg:w-48 space-y-3">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Debit (Increase Asset/Exp)</label>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-2">Debit (Increase Asset/Exp)</label>
                             <input type="number" step="0.01" name="items[{{$i}}][debit]" class="debit-input w-full px-8 py-5 bg-white border-2 border-slate-100 focus:border-emerald-500 rounded-2xl font-black text-slate-800 outline-none text-right shadow-sm" placeholder="0.00">
                         </div>
                         <div class="lg:w-48 space-y-3">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Credit (Increase Liab/Rev)</label>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-2">Credit (Increase Liab/Rev)</label>
                             <input type="number" step="0.01" name="items[{{$i}}][credit]" class="credit-input w-full px-8 py-5 bg-white border-2 border-slate-100 focus:border-rose-500 rounded-2xl font-black text-slate-800 outline-none text-right shadow-sm" placeholder="0.00">
                         </div>
                         <div class="hidden lg:flex items-end pb-3">
@@ -88,16 +88,16 @@
                 <div class="p-10 border-t border-slate-100 bg-slate-900 text-white flex justify-between items-center rounded-b-[3rem]">
                     <div class="flex gap-12">
                         <div>
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Total Debits</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">Total Debits</p>
                             <p id="total-debit" class="text-3xl font-black tracking-tighter text-emerald-400">RP 0</p>
                         </div>
                         <div>
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Total Credits</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">Total Credits</p>
                             <p id="total-credit" class="text-3xl font-black tracking-tighter text-rose-400">RP 0</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Out of Balance</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-2">Out of Balance</p>
                         <p id="imbalance" class="text-3xl font-black tracking-tighter">Balanced</p>
                     </div>
                 </div>

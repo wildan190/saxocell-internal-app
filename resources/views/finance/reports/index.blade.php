@@ -5,7 +5,7 @@
 @section('content')
 <div class="content-wrapper bg-slate-50/50 min-h-screen pb-20 p-8 md:p-12">
     <div class="mb-16">
-        <h1 class="text-5xl font-black text-slate-900 tracking-tight">Intelligence Center</h1>
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Intelligence Center</h1>
         <p class="text-slate-500 mt-4 font-medium text-lg">Generate audit-ready financial statements and analysis.</p>
     </div>
 
@@ -17,7 +17,7 @@
             </div>
             <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Profit & Loss</h2>
             <p class="text-slate-500 font-medium mb-10 flex-grow leading-relaxed">Periodic income performance summary.</p>
-            <a href="{{ route('finance.reports.pl') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-widest hover:bg-black transition-all">Generate</a>
+            <a href="{{ route('finance.reports.pl') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-wider hover:bg-black transition-all">Generate</a>
         </div>
 
         <!-- Balance Sheet Card -->
@@ -27,7 +27,7 @@
             </div>
             <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Balance Sheet</h2>
             <p class="text-slate-500 font-medium mb-10 flex-grow leading-relaxed">Statement of financial position.</p>
-            <a href="{{ route('finance.reports.bs') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-widest hover:bg-black transition-all">Generate</a>
+            <a href="{{ route('finance.reports.bs') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-wider hover:bg-black transition-all">Generate</a>
         </div>
 
         <!-- Trial Balance Card -->
@@ -37,7 +37,7 @@
             </div>
             <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Trial Balance</h2>
             <p class="text-slate-500 font-medium mb-10 flex-grow leading-relaxed">Verification of ledger arithmetic.</p>
-            <a href="{{ route('finance.reports.tb') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-widest hover:bg-black transition-all">Generate</a>
+            <a href="{{ route('finance.reports.tb') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-wider hover:bg-black transition-all">Generate</a>
         </div>
 
         <!-- AP Aging Card -->
@@ -47,7 +47,7 @@
             </div>
             <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Payables Aging</h2>
             <p class="text-slate-500 font-medium mb-10 flex-grow leading-relaxed">Outstanding debt risk assessment.</p>
-            <a href="{{ route('finance.reports.aging') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-widest hover:bg-black transition-all">Generate</a>
+            <a href="{{ route('finance.reports.aging') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-wider hover:bg-black transition-all">Generate</a>
         </div>
     </div>
 </div>

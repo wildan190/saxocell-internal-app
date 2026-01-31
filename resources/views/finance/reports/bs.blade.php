@@ -13,14 +13,14 @@
             <div class="flex justify-between items-center mb-20 relative">
                 <div>
                     <h1 class="text-7xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Financial Result</h1>
-                    <p class="text-slate-400 font-bold text-xl mt-6 tracking-widest uppercase ml-2 flex items-center gap-4">
+                    <p class="text-slate-400 font-bold text-xl mt-6 tracking-wider uppercase ml-2 flex items-center gap-4">
                         <i data-feather="calendar" class="w-6 h-6 text-blue-600"></i> Balance Sheet Statement • As of {{ $date }}
                     </p>
                 </div>
                 <div class="text-right">
                     <div class="flex flex-col items-end">
-                        <span class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-2">Total Solvency</span>
-                        <p class="text-5xl font-black text-slate-900">RP {{ number_format($totalAssets, 0, ',', '.') }}</p>
+                        <span class="text-xs font-bold uppercase tracking-[0.4em] text-slate-400 mb-2">Total Solvency</span>
+                        <p class="text-3xl font-bold text-slate-900">RP {{ number_format($totalAssets, 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
@@ -42,8 +42,8 @@
                             @endforeach
                         </div>
                         <div class="bg-slate-50 rounded-[3rem] p-12 flex flex-col justify-center text-center border-2 border-slate-100 shadow-inner">
-                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-4">Cumulative Liquid Value</p>
-                            <p class="text-5xl font-black text-slate-900">RP {{ number_format($totalAssets, 0, ',', '.') }}</p>
+                            <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-4">Cumulative Liquid Value</p>
+                            <p class="text-3xl font-bold text-slate-900">RP {{ number_format($totalAssets, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </section>
@@ -58,7 +58,7 @@
                         <div class="space-y-12">
                             <!-- Liabilities Sub-section -->
                             <div class="space-y-4">
-                                <h3 class="text-xs font-black uppercase tracking-widest text-rose-500 mb-6 flex items-center gap-2">
+                                <h3 class="text-xs font-black uppercase tracking-wider text-rose-500 mb-6 flex items-center gap-2">
                                     <span class="w-8 h-[2px] bg-rose-200"></span> Liabilities
                                 </h3>
                                 @foreach($liabilities as $acc)
@@ -70,7 +70,7 @@
                             </div>
                             <!-- Equity Sub-section -->
                             <div class="space-y-4 pt-12 border-t-2 border-slate-100">
-                                <h3 class="text-xs font-black uppercase tracking-widest text-emerald-500 mb-6 flex items-center gap-2">
+                                <h3 class="text-xs font-black uppercase tracking-wider text-emerald-500 mb-6 flex items-center gap-2">
                                     <span class="w-8 h-[2px] bg-emerald-200"></span> Shareholder's Equity
                                 </h3>
                                 @foreach($equity as $acc)
@@ -83,14 +83,14 @@
                         </div>
                         <div class="bg-slate-900 rounded-[3rem] p-12 flex flex-col justify-center text-center text-white shadow-2xl relative overflow-hidden group">
                             <div class="absolute -right-20 -bottom-20 w-60 h-60 bg-white/5 rounded-full blur-[60px] group-hover:bg-white/10 transition-all"></div>
-                            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4">Total Liabilities & Equity</p>
-                            <p class="text-5xl font-black text-white">RP {{ number_format($totalLiabilities + $totalEquity, 0, ',', '.') }}</p>
+                            <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-500 mb-4">Total Liabilities & Equity</p>
+                            <p class="text-3xl font-bold text-white">RP {{ number_format($totalLiabilities + $totalEquity, 0, ',', '.') }}</p>
                             @if(abs($totalAssets - ($totalLiabilities + $totalEquity)) < 0.01)
-                                <div class="mt-8 flex items-center justify-center gap-3 text-emerald-400 font-black text-xs uppercase tracking-widest">
+                                <div class="mt-8 flex items-center justify-center gap-3 text-emerald-400 font-black text-xs uppercase tracking-wider">
                                     <i data-feather="check-circle" class="w-4 h-4"></i> Balanced Structure
                                 </div>
                             @else
-                                <div class="mt-8 flex items-center justify-center gap-3 text-rose-400 font-black text-xs uppercase tracking-widest">
+                                <div class="mt-8 flex items-center justify-center gap-3 text-rose-400 font-black text-xs uppercase tracking-wider">
                                     <i data-feather="alert-triangle" class="w-4 h-4"></i> Imbalance Detected
                                 </div>
                             @endif

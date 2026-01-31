@@ -12,13 +12,13 @@
                 </a>
                 <span class="text-blue-600 font-black text-xs uppercase tracking-[0.3em]">Account Ledger</span>
             </div>
-            <h1 class="text-5xl font-black text-slate-900 tracking-tight">{{ $account->name }}</h1>
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">{{ $account->name }}</h1>
             <p class="text-slate-500 mt-3 font-medium text-lg">Detailed transaction history for account #{{ $account->code }}.</p>
         </div>
         
         <div class="text-right">
-            <h3 class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-1">Current Balance</h3>
-            <p class="text-5xl font-black text-slate-900">RP {{ number_format($account->current_balance, 0, ',', '.') }}</p>
+            <h3 class="text-slate-400 font-bold text-xs uppercase tracking-wider mb-1">Current Balance</h3>
+            <p class="text-3xl font-bold text-slate-900">RP {{ number_format($account->current_balance, 0, ',', '.') }}</p>
         </div>
     </div>
 
@@ -28,12 +28,12 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="bg-slate-50/50">
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Journal Ref</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Debit</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Credit</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Flow</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Date</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Journal Ref</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Description</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Debit</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Credit</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Flow</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">

@@ -6,7 +6,7 @@
 <div class="content-wrapper bg-slate-50/50 min-h-screen pb-20">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
-            <h1 class="text-5xl font-black text-slate-900 tracking-tight">Bank Reconciliation</h1>
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Bank Reconciliation</h1>
             <p class="text-slate-500 mt-3 font-medium text-lg">Compare your bank statements with accounting records.</p>
         </div>
         
@@ -20,11 +20,11 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="bg-slate-50/50">
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Bank Account</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Statement Date</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Closing Balance</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Action</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Bank Account</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Statement Date</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Closing Balance</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -44,13 +44,13 @@
                         </td>
                         <td class="px-10 py-6 text-center">
                             @if($rec->status === 'completed')
-                                <span class="px-4 py-2 bg-emerald-100 text-emerald-600 rounded-xl font-black text-xs uppercase tracking-widest">Completed</span>
+                                <span class="px-4 py-2 bg-emerald-100 text-emerald-600 rounded-xl font-black text-xs uppercase tracking-wider">Completed</span>
                             @else
-                                <span class="px-4 py-2 bg-amber-100 text-amber-600 rounded-xl font-black text-xs uppercase tracking-widest">Draft</span>
+                                <span class="px-4 py-2 bg-amber-100 text-amber-600 rounded-xl font-black text-xs uppercase tracking-wider">Draft</span>
                             @endif
                         </td>
                         <td class="px-10 py-6 text-center">
-                            <a href="{{ route('finance.reconciliations.show', $rec->id) }}" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95">
+                            <a href="{{ route('finance.reconciliations.show', $rec->id) }}" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-black text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all active:scale-95">
                                 <i data-feather="{{ $rec->status === 'completed' ? 'eye' : 'edit-3' }}" class="w-4 h-4"></i>
                                 {{ $rec->status === 'completed' ? 'View' : 'Continue' }}
                             </a>

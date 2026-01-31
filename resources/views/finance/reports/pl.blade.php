@@ -8,11 +8,11 @@
     <div class="flex justify-between items-start mb-16 border-b-4 border-slate-900 pb-12">
         <div>
             <h1 class="text-6xl font-black text-slate-900 tracking-tighter uppercase italic">Income Statement</h1>
-            <p class="text-slate-400 font-black text-lg mt-4 tracking-widest uppercase ml-1">Saxocell Internal Systems • Financial Period: {{ $startDate }} to {{ $endDate }}</p>
+            <p class="text-slate-400 font-black text-lg mt-4 tracking-wider uppercase ml-1">Saxocell Internal Systems • Financial Period: {{ $startDate }} to {{ $endDate }}</p>
         </div>
         <div class="text-right">
             <div class="p-6 bg-slate-900 text-white rounded-[2rem] shadow-2xl">
-                <p class="text-[10px] font-black uppercase tracking-[0.5em] mb-2 opacity-50">Net Operating Income</p>
+                <p class="text-xs font-bold uppercase tracking-[0.5em] mb-2 opacity-50">Net Operating Income</p>
                 <p class="text-4xl font-black {{ $netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">RP {{ number_format($netProfit, 0, ',', '.') }}</p>
             </div>
         </div>
@@ -56,10 +56,10 @@
             <div class="flex justify-between items-center p-10 bg-slate-50 rounded-[3rem]">
                 <div>
                     <h3 class="text-4xl font-black text-slate-900 uppercase tracking-tighter italic">Net Profit / Loss</h3>
-                    <p class="text-slate-400 font-bold text-sm uppercase tracking-widest mt-2">After all operating expenses and income</p>
+                    <p class="text-slate-400 font-bold text-sm uppercase tracking-wider mt-2">After all operating expenses and income</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-5xl font-black {{ $netProfit >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">RP {{ number_format($netProfit, 0, ',', '.') }}</p>
+                    <p class="text-3xl font-bold {{ $netProfit >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">RP {{ number_format($netProfit, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>

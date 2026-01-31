@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="max-w-4xl mx-auto mb-16 border-b-4 border-slate-900 pb-12">
         <h1 class="text-6xl font-black text-slate-900 tracking-tighter uppercase italic">Trial Balance</h1>
-        <p class="text-slate-400 font-black text-lg mt-4 tracking-widest uppercase ml-1">Universal Consistency Check • As of {{ $date }}</p>
+        <p class="text-slate-400 font-black text-lg mt-4 tracking-wider uppercase ml-1">Universal Consistency Check • As of {{ $date }}</p>
     </div>
 
     <!-- Table -->
@@ -15,9 +15,9 @@
         <table class="w-full text-left">
             <thead>
                 <tr class="bg-slate-900 text-white">
-                    <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em]">Account Code & Name</th>
-                    <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-right">Debit</th>
-                    <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-right">Credit</th>
+                    <th class="px-10 py-6 text-xs font-bold uppercase tracking-[0.3em]">Account Code & Name</th>
+                    <th class="px-10 py-6 text-xs font-bold uppercase tracking-[0.3em] text-right">Debit</th>
+                    <th class="px-10 py-6 text-xs font-bold uppercase tracking-[0.3em] text-right">Credit</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 italic">
@@ -61,14 +61,14 @@
         <div class="p-3 bg-white rounded-full text-emerald-500 shadow-sm animate-bounce">
             <i data-feather="check" class="w-6 h-6"></i>
         </div>
-        <span class="text-emerald-700 font-extrabold text-lg uppercase tracking-widest italic">Ledger Integrity Verified: Perfectly Balanced</span>
+        <span class="text-emerald-700 font-extrabold text-lg uppercase tracking-wider italic">Ledger Integrity Verified: Perfectly Balanced</span>
     </div>
     @else
     <div class="max-w-4xl mx-auto mt-12 flex items-center justify-center gap-4 py-8 bg-rose-50 rounded-[2.5rem] border border-rose-100 shadow-xl shadow-rose-50">
         <div class="p-3 bg-white rounded-full text-rose-500 shadow-sm">
             <i data-feather="alert-triangle" class="w-6 h-6"></i>
         </div>
-        <span class="text-rose-700 font-extrabold text-lg uppercase tracking-widest italic">Discrepancy Detected: System Imbalance of RP {{ number_format(abs($totalDebit - $totalCredit), 0, ',', '.') }}</span>
+        <span class="text-rose-700 font-extrabold text-lg uppercase tracking-wider italic">Discrepancy Detected: System Imbalance of RP {{ number_format(abs($totalDebit - $totalCredit), 0, ',', '.') }}</span>
     </div>
     @endif
 </div>
