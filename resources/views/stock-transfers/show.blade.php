@@ -117,9 +117,16 @@
         </div>
 
         <div class="p-8 md:p-10">
-            <h3 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center gap-3">
-                <span class="p-2 bg-slate-100 rounded-lg"><i data-feather="package" class="w-5 h-5 text-slate-600"></i></span>
-                Manifest Details
+            <h3 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center justify-between gap-3">
+                <span class="flex items-center gap-3">
+                    <span class="p-2 bg-slate-100 rounded-lg"><i data-feather="package" class="w-5 h-5 text-slate-600"></i></span>
+                    Manifest Details
+                </span>
+                @if($transfer->status == 'pending')
+                    <button type="button" onclick="startTransferScan()" class="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-black flex items-center gap-2 transition-all">
+                        <i data-feather="maximize" class="w-4 h-4"></i> SCAN TO VERIFY
+                    </button>
+                @endif
             </h3>
             
             <form action="{{ route('stock-transfers.receive', $transfer->id) }}" method="POST">
@@ -140,12 +147,20 @@
                         </thead>
                         <tbody class="divide-y divide-slate-50">
                             @foreach($transfer->items as $item)
-                            <tr class="hover:bg-slate-50/30 transition-colors">
+                            @php
+                                $sku = $item->productVariant?->sku ?? ($item->product?->sku ?? null);
+                            @endphp
+                            <tr class="transfer-row hover:bg-slate-50/30 transition-colors" data-sku="{{ $sku }}">
                                 <td class="px-8 py-6">
-                                    <span class="font-bold text-slate-800 leading-tight block">{{ $item->product->name }}</span>
+                                    <span class="font-bold text-slate-800 leading-tight block">{{ $item->product?->name }}</span>
+                                    @if($item->productVariant)
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase mt-1 block">
+                                            <i data-feather="layers" class="w-3 h-3 inline"></i> {{ $item->productVariant->name }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-8 py-6 text-center">
-                                    <span class="font-mono text-[11px] px-2 py-1 bg-slate-100 text-slate-500 rounded-md">{{ $item->product->sku }}</span>
+                                    <span class="font-mono text-[11px] px-2 py-1 bg-slate-100 text-slate-500 rounded-md">{{ $sku }}</span>
                                 </td>
                                 <td class="px-8 py-6 text-center">
                                     <span class="text-lg font-black text-slate-700">{{ $item->quantity_sent }}</span>
@@ -155,7 +170,8 @@
                                         <div class="flex justify-end">
                                             <input type="number" 
                                                    name="items[{{ $item->id }}]" 
-                                                   class="w-32 px-4 py-2 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 focus:bg-white rounded-xl font-black text-slate-800 text-right transition-all outline-none" 
+                                                   id="received-{{ $sku }}"
+                                                   class="w-32 px-4 py-2 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 focus:bg-white rounded-xl font-black text-slate-800 text-right transition-all outline-none received-input" 
                                                    value="{{ old("items.{$item->id}", $item->quantity_sent) }}" 
                                                    min="0"
                                                    max="{{ $item->quantity_sent }}"
@@ -200,6 +216,33 @@
         if (typeof feather !== 'undefined') {
             feather.replace();
         }
+
+        window.startTransferScan = function() {
+            window.openQRScanner((sku) => {
+                const input = document.getElementById('received-' + sku);
+                if (input) {
+                    const max = parseInt(input.max);
+                    let currentVal = parseInt(input.value) || 0;
+                    
+                    // Logic: Receiving can be incremental
+                    input.value = Math.min(max, currentVal + 1);
+
+                    // Visual Feedback
+                    const row = input.closest('tr');
+                    row.style.backgroundColor = '#ecfdf5';
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    setTimeout(() => {
+                        row.style.transition = 'background-color 0.5s';
+                        row.style.backgroundColor = '';
+                        startTransferScan(); // Recursive for continuous scanning
+                    }, 500);
+                } else {
+                    alert("SKU '" + sku + "' not found in this transfer.");
+                    startTransferScan();
+                }
+            });
+        };
     });
 </script>
 @endpush

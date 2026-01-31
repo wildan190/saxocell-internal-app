@@ -49,6 +49,21 @@
                         @error('type') <p class="error-message">{{ $message }}</p> @enderror
                     </div>
 
+                    <div class="form-group">
+                        <label for="warehouse_id" class="form-label">Warehouse Location</label>
+                        <select id="warehouse_id" name="warehouse_id" class="form-control">
+                            <option value="">Select Warehouse...</option>
+                            @foreach($warehouses as $warehouse)
+                                <option value="{{ $warehouse->id }}" {{ old('warehouse_id') == $warehouse->id ? 'selected' : '' }}>
+                                    {{ $warehouse->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('warehouse_id') <p class="error-message">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group" id="supplierGroup">
                         <label for="supplier_id" class="form-label">Supplier Partner (Optional)</label>
                         <select id="supplier_id" name="supplier_id" class="form-control">
@@ -60,19 +75,31 @@
                             @endforeach
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="reference_number" class="form-label">Internal Reference</label>
+                        <input type="text" id="reference_number" name="reference_number" class="form-control" value="{{ old('reference_number') }}" placeholder="e.g. ADJ-001">
+                    </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="product_id" class="form-label">Product SKU</label>
-                        <select id="product_id" name="product_id" class="form-control" required>
-                            <option value="">Select target product...</option>
-                            @foreach($products as $product)
-                                <option value="{{ $product->id }}" data-has-variants="{{ $product->variants->count() > 0 ? 'true' : 'false' }}" {{ old('product_id') == $product->id ? 'selected' : '' }}>
-                                    {{ $product->name }} (Current: {{ $product->stock_quantity }})
-                                </option>
-                            @endforeach
-                        </select>
+                    <div class="form-group" style="position: relative;">
+                        <label for="product_id" class="form-label">Target Product</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <select id="product_id" name="product_id" class="form-control" style="flex: 1;" required>
+                                <option value="">Select target product...</option>
+                                @foreach($products as $product)
+                                    <option value="{{ $product->id }}" 
+                                            data-sku="{{ $product->sku }}"
+                                            {{ old('product_id') == $product->id ? 'selected' : '' }}>
+                                        {{ $product->name }} (SKU: {{ $product->sku }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <button type="button" onclick="startScan()" class="btn btn-secondary" title="Scan QR Code" style="padding: 0.5rem 1rem;">
+                                <i data-feather="maximize"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group" id="variantGroup" style="display: none;">
@@ -88,10 +115,7 @@
                         <label for="quantity" class="form-label">Quantity Value</label>
                         <input type="number" id="quantity" name="quantity" class="form-control" value="{{ old('quantity') }}" min="1" required placeholder="0">
                     </div>
-
                     <div class="form-group">
-                        <label for="reference_number" class="form-label">Internal Reference</label>
-                        <input type="text" id="reference_number" name="reference_number" class="form-control" value="{{ old('reference_number') }}" placeholder="e.g. ADJ-001">
                     </div>
                 </div>
             </div>
@@ -141,7 +165,7 @@
 
         const productsData = @json($products);
 
-        function updateVariants() {
+        function updateVariants(selectedVariantId = null) {
             const productId = productSelect.value;
             const product = productsData.find(p => p.id == productId);
             
@@ -152,7 +176,8 @@
                 product.variants.forEach(variant => {
                     const option = document.createElement('option');
                     option.value = variant.id;
-                    option.textContent = `${variant.name} (Cur: ${variant.stock_quantity})`;
+                    option.textContent = `${variant.name} (SKU: ${variant.sku})`;
+                    if (variant.id == selectedVariantId) option.selected = true;
                     variantSelect.appendChild(option);
                 });
             } else {
@@ -172,11 +197,49 @@
             }
         }
 
-        productSelect.addEventListener('change', updateVariants);
+        window.startScan = function() {
+            window.openQRScanner((sku) => {
+                console.log("Scanned SKU:", sku);
+                
+                // Try to find variant first
+                let foundVariant = null;
+                let foundProduct = null;
+
+                for (const product of productsData) {
+                    const variant = product.variants.find(v => v.sku === sku);
+                    if (variant) {
+                        foundVariant = variant;
+                        foundProduct = product;
+                        break;
+                    }
+                    if (product.sku === sku) {
+                        foundProduct = product;
+                        break;
+                    }
+                }
+
+                if (foundProduct) {
+                    productSelect.value = foundProduct.id;
+                    updateVariants(foundVariant ? foundVariant.id : null);
+                    
+                    // Add success effect
+                    productSelect.style.borderColor = '#10b981';
+                    productSelect.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+                    setTimeout(() => {
+                        productSelect.style.borderColor = '';
+                        productSelect.style.boxShadow = '';
+                    }, 2000);
+                } else {
+                    alert("Product with SKU '" + sku + "' not found in active inventory.");
+                }
+            });
+        };
+
+        productSelect.addEventListener('change', () => updateVariants());
         typeSelect.addEventListener('change', toggleSupplier);
 
         // Initial setup
-        if (productSelect.value) updateVariants();
+        if (productSelect.value) updateVariants(variantSelect.value);
         toggleSupplier();
     });
 </script>

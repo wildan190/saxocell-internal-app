@@ -119,14 +119,14 @@
                         <td class="px-8 py-6">
                             <div class="flex items-center justify-center gap-4">
                                 <div class="text-center">
-                                    <span class="block text-xs font-black text-slate-700">{{ $transfer->sourceWarehouse->name }}</span>
+                                    <span class="block text-xs font-black text-slate-700">{{ $transfer->sourceWarehouse?->name ?? 'Unknown' }}</span>
                                     <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Origin</span>
                                 </div>
                                 <div class="p-2 bg-slate-100 rounded-xl text-slate-400">
                                     <i data-feather="arrow-right" class="w-4 h-4"></i>
                                 </div>
                                 <div class="text-center">
-                                    <span class="block text-xs font-black text-slate-700">{{ $transfer->destinationStore->name }}</span>
+                                    <span class="block text-xs font-black text-slate-700">{{ $transfer->destinationStore?->name ?? 'Unknown' }}</span>
                                     <span class="block text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Destination</span>
                                 </div>
                             </div>

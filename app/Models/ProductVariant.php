@@ -20,7 +20,8 @@ class ProductVariant extends Model
     ];
 
     protected $appends = [
-        'formatted_attributes'
+        'formatted_attributes',
+        'qr_code_content'
     ];
 
     protected $casts = [
@@ -99,5 +100,13 @@ class ProductVariant extends Model
     public function inventoryTransactions(): HasMany
     {
         return $this->hasMany(\App\Models\InventoryTransaction::class);
+    }
+
+    /**
+     * Get the content for QR code.
+     */
+    public function getQrCodeContentAttribute(): string
+    {
+        return $this->sku ?? $this->product->sku ?? "PROD-{$this->product_id}-VAR-{$this->id}";
     }
 }
