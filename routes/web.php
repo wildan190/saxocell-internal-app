@@ -135,5 +135,51 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports/aging', [\App\Http\Controllers\Finance\ReportController::class, 'payablesAging'])->name('reports.aging');
         Route::get('reports/cashflow', [\App\Http\Controllers\Finance\ReportController::class, 'cashflow'])->name('reports.cashflow');
     });
+
+    // HRM Module
+    Route::prefix('hrm')->name('hrm.')->group(function () {
+        Route::resource('departments', \App\Http\Controllers\HRM\DepartmentController::class);
+        
+        // Employees & Salary Config
+        Route::get('employees/{employee}/salary-config', [\App\Http\Controllers\HRM\EmployeeController::class, 'salaryConfig'])->name('employees.salary-config');
+        Route::post('employees/{employee}/salary-config', [\App\Http\Controllers\HRM\EmployeeController::class, 'updateSalaryConfig'])->name('employees.salary-config.update');
+        Route::resource('employees', \App\Http\Controllers\HRM\EmployeeController::class);
+        
+        // Attendance
+        Route::get('attendance', [\App\Http\Controllers\HRM\AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('attendance/clock-in', [\App\Http\Controllers\HRM\AttendanceController::class, 'clockIn'])->name('attendance.clock-in');
+        Route::post('attendance/clock-out', [\App\Http\Controllers\HRM\AttendanceController::class, 'clockOut'])->name('attendance.clock-out');
+        Route::get('attendance/report', [\App\Http\Controllers\HRM\AttendanceController::class, 'report'])->name('attendance.report');
+
+        // Overtime
+        Route::get('overtime', [\App\Http\Controllers\HRM\OvertimeController::class, 'index'])->name('overtime.index');
+        Route::post('overtime', [\App\Http\Controllers\HRM\OvertimeController::class, 'store'])->name('overtime.store');
+        Route::post('overtime/{overtime}/approve', [\App\Http\Controllers\HRM\OvertimeController::class, 'approve'])->name('overtime.approve');
+        Route::post('overtime/{overtime}/reject', [\App\Http\Controllers\HRM\OvertimeController::class, 'reject'])->name('overtime.reject');
+
+        // Payroll & Components
+        Route::resource('salary-components', \App\Http\Controllers\HRM\SalaryComponentController::class);
+        Route::get('payroll', [\App\Http\Controllers\HRM\PayrollController::class, 'index'])->name('payroll.index');
+        Route::post('payroll/generate', [\App\Http\Controllers\HRM\PayrollController::class, 'generate'])->name('payroll.generate');
+        Route::get('payroll/{payroll}/payslip', [\App\Http\Controllers\HRM\PayrollController::class, 'payslip'])->name('payroll.payslip');
+        Route::post('payroll/{payroll}/approve', [\App\Http\Controllers\HRM\PayrollController::class, 'approve'])->name('payroll.approve');
+
+        // Recruitment
+        Route::get('recruitment', [\App\Http\Controllers\HRM\RecruitmentController::class, 'index'])->name('recruitment.index');
+        Route::resource('jobs', \App\Http\Controllers\HRM\RecruitmentController::class)->except(['index']);
+        Route::get('applicants', [\App\Http\Controllers\HRM\RecruitmentController::class, 'applicants'])->name('applicants.index');
+        Route::post('applicants/{applicant}/update-status', [\App\Http\Controllers\HRM\RecruitmentController::class, 'updateApplicant'])->name('applicants.update-status');
+        
+        // KPI
+        Route::get('kpi', [\App\Http\Controllers\HRM\KpiController::class, 'index'])->name('kpi.index');
+        Route::get('kpi/indicators', [\App\Http\Controllers\HRM\KpiController::class, 'indicators'])->name('kpi.indicators');
+        Route::resource('evaluations', \App\Http\Controllers\HRM\KpiController::class)->except(['index']);
+        
+        // ESS (Employee Self Service)
+        Route::get('ess', [\App\Http\Controllers\HRM\EssController::class, 'index'])->name('ess.index');
+        Route::get('ess/profile', [\App\Http\Controllers\HRM\EssController::class, 'profile'])->name('ess.profile');
+        Route::get('ess/payslips', [\App\Http\Controllers\HRM\EssController::class, 'payslips'])->name('ess.payslips');
+        Route::get('ess/attendance', [\App\Http\Controllers\HRM\EssController::class, 'attendance'])->name('ess.attendance');
+    });
 });
 

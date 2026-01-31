@@ -149,6 +149,70 @@
                         Reports
                     </a>
                 </div>
+
+                <div class="nav-section-title">HR & Personnel</div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.employees.index') }}" class="nav-link {{ request()->routeIs('hrm.employees.*') ? 'active' : '' }}">
+                        <i data-feather="users" class="nav-icon"></i>
+                        Employees
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.attendance.index') }}" class="nav-link {{ request()->routeIs('hrm.attendance.*') ? 'active' : '' }}">
+                        <i data-feather="clock" class="nav-icon"></i>
+                        Attendance
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.overtime.index') }}" class="nav-link {{ request()->routeIs('hrm.overtime.*') ? 'active' : '' }}">
+                        <i data-feather="watch" class="nav-icon"></i>
+                        Overtime
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.payroll.index') }}" class="nav-link {{ request()->routeIs('hrm.payroll.*') || request()->routeIs('hrm.salary-components.*') ? 'active' : '' }}">
+                        <i data-feather="dollar-sign" class="nav-icon"></i>
+                        Payroll
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.recruitment.index') }}" class="nav-link {{ request()->routeIs('hrm.recruitment.*') || request()->routeIs('hrm.applicants.*') || request()->routeIs('hrm.jobs.*') ? 'active' : '' }}">
+                        <i data-feather="user-plus" class="nav-icon"></i>
+                        Recruitment
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.kpi.index') }}" class="nav-link {{ request()->routeIs('hrm.kpi.*') ? 'active' : '' }}">
+                        <i data-feather="trending-up" class="nav-icon"></i>
+                        KPI Evaluation
+                    </a>
+                </div>
+
+                <div class="nav-section-title">My Portal (ESS)</div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.ess.index') }}" class="nav-link {{ request()->routeIs('hrm.ess.index') ? 'active' : '' }}">
+                        <i data-feather="home" class="nav-icon"></i>
+                        My Dashboard
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.ess.attendance') }}" class="nav-link {{ request()->routeIs('hrm.ess.attendance') ? 'active' : '' }}">
+                        <i data-feather="calendar" class="nav-icon"></i>
+                        My Attendance
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.ess.payslips') }}" class="nav-link {{ request()->routeIs('hrm.ess.payslips') ? 'active' : '' }}">
+                        <i data-feather="file-text" class="nav-icon"></i>
+                        My Payslips
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.ess.profile') }}" class="nav-link {{ request()->routeIs('hrm.ess.profile') ? 'active' : '' }}">
+                        <i data-feather="user" class="nav-icon"></i>
+                        My Profile
+                    </a>
+                </div>
             </div>
         </nav>
     </aside>

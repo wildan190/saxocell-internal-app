@@ -13,12 +13,12 @@
                 </div>
                 <div>
                     <h1 class="text-3xl font-black text-slate-900 leading-tight">{{ $reconciliation->account->name }}</h1>
-                    <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">Statement Date: {{ $reconciliation->statement_date->format('M d, Y') }}</p>
+                    <p class="text-slate-500 font-bold uppercase tracking-wider text-xs">Statement Date: {{ $reconciliation->statement_date->format('M d, Y') }}</p>
                 </div>
             </div>
 
             <div class="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-xl">
-                <span class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 text-center">Difference</span>
+                <span class="block text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-3 text-center">Difference</span>
                 <div id="differenceDisplay" class="text-3xl font-black text-center {{ abs($reconciliation->closing_balance - $reconciliation->reconciled_balance) < 0.01 ? 'text-emerald-500' : 'text-rose-500' }} tracking-tight">
                     RP {{ number_format($reconciliation->closing_balance - $reconciliation->reconciled_balance, 2, ',', '.') }}
                 </div>
@@ -34,11 +34,11 @@
                 </button>
                 <form id="finalizeForm" action="{{ route('finance.reconciliations.finalize', $reconciliation->id) }}" method="POST" class="hidden">@csrf</form>
                 @else
-                <div class="h-full bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-[2rem] font-black flex items-center justify-center gap-3 uppercase tracking-widest text-xs">
+                <div class="h-full bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-[2rem] font-black flex items-center justify-center gap-3 uppercase tracking-wider text-xs">
                     <i data-feather="shield-check" class="w-5 h-5"></i> Reconciled
                 </div>
                 @endif
-                <a href="{{ route('finance.reconciliations.index') }}" class="py-4 bg-white border border-slate-200 text-slate-600 rounded-[2rem] font-black text-center transition-all hover:bg-slate-50 active:scale-95 text-xs uppercase tracking-widest">
+                <a href="{{ route('finance.reconciliations.index') }}" class="py-4 bg-white border border-slate-200 text-slate-600 rounded-[2rem] font-black text-center transition-all hover:bg-slate-50 active:scale-95 text-xs uppercase tracking-wider">
                     Back to List
                 </a>
             </div>
@@ -47,27 +47,27 @@
         <!-- Summary Totals Bar -->
         <div class="bg-white rounded-[2.5rem] border border-slate-200 shadow-lg p-6 flex flex-wrap justify-around items-center gap-8">
             <div class="text-center">
-                <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Opening Balance</span>
+                <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Opening Balance</span>
                 <span class="text-lg font-bold text-slate-700">Rp {{ number_format($reconciliation->opening_balance, 2, ',', '.') }}</span>
             </div>
             <div class="text-slate-300"><i data-feather="plus" class="w-4 h-4"></i></div>
             <div class="text-center">
-                <span class="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Total Clearings (Dr)</span>
+                <span class="block text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Total Clearings (Dr)</span>
                 <span id="totalDebit" class="text-lg font-bold text-emerald-600">Rp 0,00</span>
             </div>
             <div class="text-slate-300"><i data-feather="minus" class="w-4 h-4"></i></div>
             <div class="text-center">
-                <span class="block text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Total Clearings (Cr)</span>
+                <span class="block text-xs font-bold text-rose-400 uppercase tracking-wider mb-1">Total Clearings (Cr)</span>
                 <span id="totalCredit" class="text-lg font-bold text-rose-600">Rp 0,00</span>
             </div>
             <div class="text-slate-300"><i data-feather="pause" class="w-4 h-4 rotate-90"></i></div>
             <div class="text-center">
-                <span class="block text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Reconciled Balance</span>
+                <span class="block text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">Reconciled Balance</span>
                 <span id="reconciledBalance" class="text-2xl font-black text-blue-600">Rp {{ number_format($reconciliation->reconciled_balance, 2, ',', '.') }}</span>
             </div>
             <div class="text-slate-300"><i data-feather="arrow-right" class="w-4 h-4"></i></div>
             <div class="text-center">
-                <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Statement Balance</span>
+                <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Statement Balance</span>
                 <span class="text-2xl font-black text-slate-900">Rp {{ number_format($reconciliation->closing_balance, 2, ',', '.') }}</span>
             </div>
         </div>
@@ -79,7 +79,7 @@
                     <span class="p-2 bg-slate-100 rounded-xl"><i data-feather="list" class="w-5 h-5 text-slate-600"></i></span>
                     Book Transactions
                 </h3>
-                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">
                     Only showing unreconciled items for this account
                 </div>
             </div>
@@ -91,11 +91,11 @@
                             <th class="px-10 py-6 w-16 text-center">
                                 <i data-feather="check-square" class="w-4 h-4 text-slate-400"></i>
                             </th>
-                            <th class="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                            <th class="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Ref / Entry</th>
-                            <th class="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</th>
-                            <th class="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Debit (+)</th>
-                            <th class="px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Credit (-)</th>
+                            <th class="px-6 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Ref / Entry</th>
+                            <th class="px-6 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Description</th>
+                            <th class="px-6 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Debit (+)</th>
+                            <th class="px-6 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Credit (-)</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50" id="itemTbody">
@@ -114,7 +114,7 @@
                                 <span class="font-bold text-slate-600 text-xs">{{ $item->journalEntry->entry_date->format('M d, Y') }}</span>
                             </td>
                             <td class="px-6 py-6">
-                                <span class="text-[10px] font-black text-blue-500 uppercase tracking-tighter">{{ substr($item->journalEntry->id, 0, 8) }}</span>
+                                <span class="text-xs font-bold text-blue-500 uppercase tracking-tighter">{{ substr($item->journalEntry->id, 0, 8) }}</span>
                             </td>
                             <td class="px-6 py-6">
                                 <span class="font-black text-slate-800">{{ $item->description ?? $item->journalEntry->description }}</span>

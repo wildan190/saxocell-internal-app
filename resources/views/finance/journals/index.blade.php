@@ -6,7 +6,7 @@
 <div class="content-wrapper bg-slate-50/50 min-h-screen pb-20">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
-            <h1 class="text-5xl font-black text-slate-900 tracking-tight">General Ledger</h1>
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">General Ledger</h1>
             <p class="text-slate-500 mt-3 font-medium text-lg">Comprehensive history of all financial transactions.</p>
         </div>
         
@@ -28,13 +28,13 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-black text-slate-800">{{ $entry->description }}</h3>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">
                             Ref: JRNL-{{ substr($entry->id, 0, 8) }} • {{ $entry->entry_date->format('M d, Y') }} • by {{ $entry->creator->name ?? 'System' }}
                         </p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <span class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    <span class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-500">
                         {{ strtoupper($entry->source_type) }}
                     </span>
                 </div>
@@ -43,9 +43,9 @@
                 <table class="w-full text-left">
                     <thead>
                         <tr class="bg-slate-50/10">
-                            <th class="px-10 py-4 text-[10px] font-black text-slate-300 uppercase tracking-widest">Account</th>
-                            <th class="px-10 py-4 text-[10px] font-black text-slate-300 uppercase tracking-widest text-right whitespace-nowrap">Debit</th>
-                            <th class="px-10 py-4 text-[10px] font-black text-slate-300 uppercase tracking-widest text-right whitespace-nowrap">Credit</th>
+                            <th class="px-10 py-4 text-xs font-bold text-slate-300 uppercase tracking-wider">Account</th>
+                            <th class="px-10 py-4 text-xs font-bold text-slate-300 uppercase tracking-wider text-right whitespace-nowrap">Debit</th>
+                            <th class="px-10 py-4 text-xs font-bold text-slate-300 uppercase tracking-wider text-right whitespace-nowrap">Credit</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50/50">

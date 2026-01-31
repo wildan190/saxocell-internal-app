@@ -219,14 +219,14 @@
                         <div class="flex items-center gap-4 text-blue-700">
                             <i data-feather="info" class="w-6 h-6 shrink-0"></i>
                             <div class="text-sm font-bold">
-                                This will approve the invoice and record a full payment of <span class="font-black">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</span> in one step.
+                                This will approve the invoice and record a full payment of <span class="font-bold">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</span> in one step.
                             </div>
                         </div>
                     </div>
 
                     <div class="space-y-3">
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Bank/Cash Account</label>
-                        <select name="account_id" class="w-full px-8 py-5 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 focus:bg-white rounded-2xl font-bold text-slate-800 transition-all outline-none shadow-sm" required>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Select Bank/Cash Account</label>
+                        <select name="account_id" class="w-full px-6 py-3 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 focus:bg-white rounded-xl font-bold text-slate-800 transition-all outline-none shadow-sm" required>
                             <option value="">-- Choose Account --</option>
                             @foreach($accounts as $account)
                                 <option value="{{ $account->id }}">{{ $account->name }} (Rp {{ number_format($account->current_balance, 0, ',', '.') }})</option>
@@ -234,11 +234,11 @@
                         </select>
                     </div>
                 </div>
-                <div class="p-10 bg-slate-50 border-t border-slate-100 flex gap-4">
-                    <button type="button" onclick="closeApprovePayModal()" class="flex-1 px-8 py-5 bg-white border border-slate-200 text-slate-600 rounded-2xl font-black transition-all active:scale-95">
+                <div class="p-8 bg-slate-50 border-t border-slate-100 flex gap-4">
+                    <button type="button" onclick="closeApprovePayModal()" class="flex-1 px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold transition-all active:scale-95">
                         Cancel
                     </button>
-                    <button type="submit" class="flex-1 px-8 py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <button type="submit" class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2">
                         <i data-feather="shield-check" class="w-5 h-5"></i> Confirm & Pay
                     </button>
                 </div>

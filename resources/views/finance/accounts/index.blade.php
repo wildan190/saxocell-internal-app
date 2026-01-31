@@ -6,7 +6,7 @@
 <div class="content-wrapper bg-slate-50/50 min-h-screen pb-20">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
-            <h1 class="text-5xl font-black text-slate-900 tracking-tight">Chart of Accounts</h1>
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Chart of Accounts</h1>
             <p class="text-slate-500 mt-3 font-medium text-lg">Define and organize your financial structure.</p>
         </div>
         
@@ -23,13 +23,13 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="bg-slate-50/50">
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Code</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Name</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Balance</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
-                        <th class="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Action</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Code</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Account Name</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Type</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Category</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Balance</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                        <th class="px-10 py-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -42,13 +42,13 @@
                             <span class="font-black text-slate-800 text-lg">{{ $account->name }}</span>
                         </td>
                         <td class="px-10 py-6">
-                            <span class="text-xs font-black uppercase tracking-widest {{ 
+                            <span class="text-xs font-black uppercase tracking-wider {{ 
                                 in_array($account->type, ['asset', 'expense']) ? 'text-blue-600' : 'text-rose-600' 
                             }}">
                                 {{ $account->type }}
                             </span>
                         </td>
-                        <td class="px-10 py-6 uppercase text-[10px] font-black text-slate-400 tracking-widest">
+                        <td class="px-10 py-6 uppercase text-xs font-bold text-slate-400 tracking-wider">
                             {{ str_replace('_', ' ', $account->category) }}
                         </td>
                         <td class="px-10 py-6 text-right font-black text-slate-900">

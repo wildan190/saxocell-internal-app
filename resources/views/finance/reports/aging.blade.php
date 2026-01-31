@@ -8,7 +8,7 @@
         <!-- Header -->
         <div class="mb-16">
             <h1 class="text-6xl font-black text-slate-900 tracking-tighter uppercase">Payables Aging Audit</h1>
-            <p class="text-slate-500 font-bold text-lg mt-4 tracking-widest uppercase flex items-center gap-3">
+            <p class="text-slate-500 font-bold text-lg mt-4 tracking-wider uppercase flex items-center gap-3">
                 <span class="w-12 h-1 bg-rose-500"></span> Debt Risk Assessment • Real-time Distribution
             </p>
         </div>
@@ -17,7 +17,7 @@
         <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-16">
             @foreach($aging as $key => $data)
             <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 block">{{ $data['label'] }}</span>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 block">{{ $data['label'] }}</span>
                 <p class="text-2xl font-black text-slate-900 mb-2">RP {{ number_format($data['total'], 0, ',', '.') }}</p>
                 <div class="flex justify-between items-center">
                     <span class="text-xs font-bold text-slate-500">{{ $data['count'] }} Invoices</span>
@@ -32,11 +32,11 @@
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-900 text-white">
-                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em]">Supplier & Reference</th>
-                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-center">Due Date</th>
-                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-center">Days Overdue</th>
-                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-right">Amount Payable</th>
-                        <th class="px-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-center">Status</th>
+                        <th class="px-10 py-6 text-xs font-bold uppercase tracking-[0.3em]">Supplier & Reference</th>
+                        <th class="px-10 py-6 text-xs font-bold uppercase tracking-[0.3em] text-center">Due Date</th>
+                        <th class="px-10 py-6 text-xs font-bold uppercase tracking-[0.3em] text-center">Days Overdue</th>
+                        <th class="px-10 py-6 text-xs font-bold uppercase tracking-[0.3em] text-right">Amount Payable</th>
+                        <th class="px-10 py-6 text-xs font-bold uppercase tracking-[0.3em] text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -70,7 +70,7 @@
                                     <i data-feather="dollar-sign" class="w-5 h-5"></i>
                                 </a>
                             @else
-                                <span class="text-[10px] font-black text-slate-200 uppercase tracking-widest">Pending Post</span>
+                                <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">Pending Post</span>
                             @endif
                         </td>
                     </tr>
