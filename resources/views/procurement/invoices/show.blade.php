@@ -42,10 +42,24 @@
                     <i data-feather="alert-triangle" class="w-4 h-4"></i> Flag Discrepancy
                 </button>
             @endif
-            @if($invoice->payment_status === 'unpaid' && $invoice->threeWayMatch?->status === 'matched')
-                <button class="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95">
-                    <i data-feather="credit-card" class="w-4 h-4"></i> Pay Invoice
+            
+            @if($invoice->status === 'matched' && !$invoice->approved_at)
+                <!-- Combined Approve & Pay Button -->
+                <button type="button" @click="showApprovePayModal = true" class="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95">
+                    <i data-feather="zap" class="w-4 h-4"></i> Approve & Pay
                 </button>
+
+                <form action="{{ route('invoices.approve', $invoice->id) }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="flex items-center gap-2 px-6 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold shadow-lg shadow-slate-200 transition-all active:scale-95">
+                        <i data-feather="check-square" class="w-4 h-4"></i> Post to Ledger (Only)
+                    </button>
+                </form>
+            @endif
+            @if($invoice->payment_status === 'unpaid' && $invoice->approved_at)
+                <a href="{{ route('finance.payments.create', $invoice->id) }}" class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-100 transition-all active:scale-95">
+                    <i data-feather="credit-card" class="w-4 h-4"></i> Record Payment
+                </a>
             @endif
             <button class="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl font-bold shadow-sm transition-all active:scale-95" onclick="window.print()">
                 <i data-feather="printer" class="w-4 h-4"></i> Print Audit
@@ -186,4 +200,77 @@
     </div>
     @endif
 </div>
+
+<!-- Approve & Pay Modal -->
+<div id="approvePayModal" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div class="p-10 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <h3 class="text-2xl font-black text-slate-900">Approve & Pay</h3>
+                <button type="button" onclick="closeApprovePayModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <form action="{{ route('invoices.approve_and_pay', $invoice->id) }}" method="POST">
+                @csrf
+                <div class="p-10 space-y-8">
+                    <div class="p-6 bg-blue-50 border border-blue-100 rounded-2xl">
+                        <div class="flex items-center gap-4 text-blue-700">
+                            <i data-feather="info" class="w-6 h-6 shrink-0"></i>
+                            <div class="text-sm font-bold">
+                                This will approve the invoice and record a full payment of <span class="font-black">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</span> in one step.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Bank/Cash Account</label>
+                        <select name="account_id" class="w-full px-8 py-5 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 focus:bg-white rounded-2xl font-bold text-slate-800 transition-all outline-none shadow-sm" required>
+                            <option value="">-- Choose Account --</option>
+                            @foreach($accounts as $account)
+                                <option value="{{ $account->id }}">{{ $account->name }} (Rp {{ number_format($account->current_balance, 0, ',', '.') }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="p-10 bg-slate-50 border-t border-slate-100 flex gap-4">
+                    <button type="button" onclick="closeApprovePayModal()" class="flex-1 px-8 py-5 bg-white border border-slate-200 text-slate-600 rounded-2xl font-black transition-all active:scale-95">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 px-8 py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i data-feather="shield-check" class="w-5 h-5"></i> Confirm & Pay
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    (function() {
+        const modal = document.getElementById('approvePayModal');
+        const trigger = document.querySelector('[onclick*="showApprovePayModal"]');
+        
+        // Overwrite the @click or onclick logic since we aren't using Alpine here for simplicity
+        if (trigger) {
+            trigger.onclick = (e) => {
+                e.preventDefault();
+                modal.classList.remove('hidden');
+                if (window.feather) feather.replace();
+            };
+        }
+
+        window.closeApprovePayModal = () => {
+            modal.classList.add('hidden');
+        };
+
+        // Close on ESC
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeApprovePayModal();
+        });
+    })();
+</script>
+@endpush
 @endsection

@@ -66,6 +66,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/procurement/invoices/create', [\App\Http\Controllers\InvoiceController::class, 'create'])->name('invoices.create');
     Route::post('/procurement/invoices', [\App\Http\Controllers\InvoiceController::class, 'store'])->name('invoices.store');
     Route::get('/procurement/invoices/{id}', [\App\Http\Controllers\InvoiceController::class, 'show'])->name('invoices.show');
+    Route::post('/procurement/invoices/{id}/approve', [\App\Http\Controllers\InvoiceController::class, 'approve'])->name('invoices.approve');
+    Route::post('/procurement/invoices/{id}/approve-and-pay', [\App\Http\Controllers\InvoiceController::class, 'approveAndPay'])->name('invoices.approve_and_pay');
 });
 
 // Warehouse & Store Management
@@ -97,5 +99,41 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/stock-opnames', [\App\Http\Controllers\StockOpnameController::class, 'store'])->name('stock-opnames.store');
     Route::get('/stock-opnames/{id}', [\App\Http\Controllers\StockOpnameController::class, 'show'])->name('stock-opnames.show');
     Route::post('/stock-opnames/{id}/finalize', [\App\Http\Controllers\StockOpnameController::class, 'finalize'])->name('stock-opnames.finalize');
+
+    // Finance Module
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Finance\FinanceController::class, 'index'])->name('index');
+        
+        // General Ledger - Chart of Accounts
+        Route::resource('accounts', \App\Http\Controllers\Finance\AccountController::class);
+        Route::get('accounts/{account}/ledger', [\App\Http\Controllers\Finance\AccountController::class, 'ledger'])->name('accounts.ledger');
+        
+        // General Ledger - Journal Entries
+        Route::resource('journals', \App\Http\Controllers\Finance\JournalController::class);
+        
+        // Account Payable (Invoices & Payments)
+        Route::get('payables', [\App\Http\Controllers\Finance\PaymentController::class, 'payables'])->name('payables');
+        Route::get('payables/{invoice}/pay', [\App\Http\Controllers\Finance\PaymentController::class, 'create'])->name('payments.create');
+        Route::post('payments', [\App\Http\Controllers\Finance\PaymentController::class, 'store'])->name('payments.store');
+        
+        // Cash Management
+        Route::get('cash', [\App\Http\Controllers\Finance\FinanceController::class, 'cashManagement'])->name('cash');
+        
+        // Bank Reconciliation
+        Route::get('reconciliations', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'index'])->name('reconciliations.index');
+        Route::get('reconciliations/create', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'create'])->name('reconciliations.create');
+        Route::post('reconciliations', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'store'])->name('reconciliations.store');
+        Route::get('reconciliations/{reconciliation}', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'show'])->name('reconciliations.show');
+        Route::post('reconciliations/{reconciliation}/items', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'updateItems'])->name('reconciliations.update-items');
+        Route::post('reconciliations/{reconciliation}/finalize', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'finalize'])->name('reconciliations.finalize');
+        
+        // Financial Reporting
+        Route::get('reports', [\App\Http\Controllers\Finance\ReportController::class, 'index'])->name('reports');
+        Route::get('reports/profit-loss', [\App\Http\Controllers\Finance\ReportController::class, 'profitAndLoss'])->name('reports.pl');
+        Route::get('reports/balance-sheet', [\App\Http\Controllers\Finance\ReportController::class, 'balanceSheet'])->name('reports.bs');
+        Route::get('reports/trial-balance', [\App\Http\Controllers\Finance\ReportController::class, 'trialBalance'])->name('reports.tb');
+        Route::get('reports/aging', [\App\Http\Controllers\Finance\ReportController::class, 'payablesAging'])->name('reports.aging');
+        Route::get('reports/cashflow', [\App\Http\Controllers\Finance\ReportController::class, 'cashflow'])->name('reports.cashflow');
+    });
 });
 

@@ -112,6 +112,43 @@
                         Stock Opname
                     </a>
                 </div>
+                <div class="nav-section-title">Finance & Accounting</div>
+                <div class="nav-item">
+                    <a href="{{ route('finance.index') }}" class="nav-link {{ request()->routeIs('finance.index') ? 'active' : '' }}">
+                        <i data-feather="monitor" class="nav-icon"></i>
+                        Finance Dashboard
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('finance.accounts.index') }}" class="nav-link {{ request()->routeIs('finance.accounts.*') ? 'active' : '' }}">
+                        <i data-feather="list" class="nav-icon"></i>
+                        Chart of Accounts
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('finance.journals.index') }}" class="nav-link {{ request()->routeIs('finance.journals.*') ? 'active' : '' }}">
+                        <i data-feather="book-open" class="nav-icon"></i>
+                        General Ledger
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('finance.payables') }}" class="nav-link {{ request()->routeIs('finance.payables') ? 'active' : '' }}">
+                        <i data-feather="external-link" class="nav-icon"></i>
+                        Accounts Payable
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('finance.reconciliations.index') }}" class="nav-link {{ request()->routeIs('finance.reconciliations.*') ? 'active' : '' }}">
+                        <i data-feather="refresh-cw" class="nav-icon"></i>
+                        Bank Reconciliation
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('finance.reports') }}" class="nav-link {{ request()->routeIs('finance.reports.*') ? 'active' : '' }}">
+                        <i data-feather="pie-chart" class="nav-icon"></i>
+                        Reports
+                    </a>
+                </div>
             </div>
         </nav>
     </aside>
@@ -135,12 +172,32 @@
 
         @yield('breadcrumb')
 
-        @yield('content')
+        <div id="ajaxContent">
+            @yield('content')
+            <div id="ajaxScripts">
+                @stack('scripts')
+            </div>
+        </div>
+
+        <!-- AJAX Skeleton Loader (Hidden) -->
+        <div id="pageSkeleton" class="hidden content-wrapper animate-pulse">
+            <div class="skeleton-title skeleton-box"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                @for($i=0; $i<4; $i++)
+                <div class="h-32 skeleton-box"></div>
+                @endfor
+            </div>
+            <div class="space-y-4">
+                @for($i=0; $i<10; $i++)
+                <div class="h-12 skeleton-box"></div>
+                @endfor
+            </div>
+        </div>
     </div>
 
     <script>
         // Initialize sidebar functionality immediately
-        document.addEventListener('DOMContentLoaded', function() {
+        (function() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
             const overlay = document.getElementById('overlay');
@@ -223,7 +280,178 @@
             handleResize();
             isInitialized = true;
 
-            // Dropdown functionality
+            // Sidebar Scroll Preservation
+            const sidebarScrollKey = 'sidebar_scroll_pos';
+            sidebar.addEventListener('scroll', () => {
+                localStorage.setItem(sidebarScrollKey, sidebar.scrollTop);
+            });
+            const savedScroll = localStorage.getItem(sidebarScrollKey);
+            if (savedScroll) {
+                sidebar.scrollTop = savedScroll;
+            }
+
+            // AJAX Navigation System
+            const ajaxContent = document.getElementById('ajaxContent');
+            const pageSkeleton = document.getElementById('pageSkeleton');
+
+            function loadPage(url, push = true) {
+                pageSkeleton.classList.remove('hidden');
+                ajaxContent.classList.add('hidden');
+                
+                fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Extract pieces
+                    const newContent = doc.querySelector('#ajaxContent');
+                    const newTitle = doc.querySelector('title').innerText;
+                    const topbarTitle = doc.querySelector('.topbar-title')?.innerText || '';
+                    
+                    // Update DOM
+                    ajaxContent.innerHTML = newContent.innerHTML;
+                    document.title = newTitle;
+                    if (document.querySelector('.topbar-title')) {
+                        document.querySelector('.topbar-title').innerText = topbarTitle;
+                    }
+
+                    // Re-execute scripts
+                    const scripts = newContent.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                        document.body.appendChild(newScript);
+                        // Optional: remove them after execution if you want to keep DOM clean
+                        // setTimeout(() => newScript.remove(), 100); 
+                    });
+
+                    // Re-initialize Feather icons and scripts
+                    if (window.feather) window.feather.replace();
+                    
+                    // Trigger DOMContentLoaded for page-specific scripts
+                    document.dispatchEvent(new Event('DOMContentLoaded'));
+                    
+                    // Handle history
+                    if (push) history.pushState({ url }, newTitle, url);
+                    
+                    // Scroll to top of content
+                    window.scrollTo(0, 0);
+
+                    // Re-mark active nav
+                    updateActiveNav(url);
+                    
+                    pageSkeleton.classList.add('hidden');
+                    ajaxContent.classList.remove('hidden');
+                })
+                .catch(err => {
+                    console.error('AJAX Load failed:', err);
+                    window.location.href = url; // Fallback to normal load
+                });
+            }
+
+            function updateActiveNav(url) {
+                const links = document.querySelectorAll('.nav-link');
+                links.forEach(link => {
+                    if (link.href === url || url.startsWith(link.href)) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            // Intercept Link Clicks
+            document.addEventListener('click', e => {
+                const link = e.target.closest('a');
+                if (!link) return;
+                
+                const url = link.href;
+                const isLocal = url.startsWith(window.location.origin);
+                const isFile = url.includes('/storage/') || url.includes('/download/');
+                
+                if (isLocal && !isFile && !link.hasAttribute('data-no-ajax') && !link.target) {
+                    e.preventDefault();
+                    loadPage(url);
+                }
+            });
+
+            // Handle Back/Forward
+            window.addEventListener('popstate', e => {
+                if (e.state && e.state.url) {
+                    loadPage(e.state.url, false);
+                }
+            });
+
+            // Intercept Form Submissions
+            document.addEventListener('submit', e => {
+                const form = e.target;
+                if (form.hasAttribute('data-no-ajax') || form.target) return;
+                
+                e.preventDefault();
+                const formData = new FormData(form);
+                const url = form.action;
+                const method = form.method.toUpperCase();
+
+                pageSkeleton.classList.remove('hidden');
+                ajaxContent.classList.add('hidden');
+
+                fetch(url, {
+                    method: method === 'GET' ? 'GET' : 'POST',
+                    body: method === 'GET' ? null : formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        loadPage(response.url);
+                        return;
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    if (!html) return;
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    const newContent = doc.querySelector('#ajaxContent');
+                    const newTitle = doc.querySelector('title').innerText;
+                    const topbarTitle = doc.querySelector('.topbar-title')?.innerText || '';
+                    
+                    ajaxContent.innerHTML = newContent.innerHTML;
+                    document.title = newTitle;
+                    if (document.querySelector('.topbar-title')) {
+                        document.querySelector('.topbar-title').innerText = topbarTitle;
+                    }
+
+                    // Re-execute scripts
+                    const scripts = newContent.querySelectorAll('script');
+                    scripts.forEach(oldScript => {
+                        const newScript = document.createElement('script');
+                        Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                        document.body.appendChild(newScript);
+                    });
+
+                    if (window.feather) window.feather.replace();
+                    
+                    // Trigger DOMContentLoaded for page-specific scripts
+                    document.dispatchEvent(new Event('DOMContentLoaded'));
+
+                    window.scrollTo(0, 0);
+                    
+                    pageSkeleton.classList.add('hidden');
+                    ajaxContent.classList.remove('hidden');
+                })
+                .catch(err => {
+                    console.error('Form AJAX failed:', err);
+                    form.submit(); // Fallback
+                });
+            });
+
+            // Dropdown functionality (remained same)
             document.addEventListener('click', function(e) {
                 const toggle = e.target.closest('.dropdown-toggle');
                 const menu = e.target.closest('.dropdown-menu');
@@ -255,11 +483,10 @@
                     });
                 }
             });
-        });
+        })();
 
     </script>
 
-    <!-- Scripts -->
-    @stack('scripts')
+    <!-- Scripts stack moved inside ajaxContent for SPA behavior -->
 </body>
 </html>

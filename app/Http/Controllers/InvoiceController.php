@@ -10,6 +10,11 @@ use App\Models\ThreeWayMatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use App\Models\Account;
+use App\Models\JournalEntry;
+use App\Models\JournalItem;
+use App\Models\Payment;
+use App\Models\User;
 
 class InvoiceController extends Controller
 {
@@ -143,6 +148,171 @@ class InvoiceController extends Controller
         $invoice = Cache::tags(['invoices'])->remember("invoices:show:{$id}", 3600, function () use ($id) {
             return Invoice::with('items.product', 'items.variant', 'purchaseOrder', 'supplier', 'threeWayMatch')->findOrFail($id);
         });
-        return view('procurement.invoices.show', compact('invoice'));
+        
+        $accounts = \App\Models\Account::whereIn('category', ['cash', 'bank'])->get();
+        return view('procurement.invoices.show', compact('invoice', 'accounts'));
+    }
+
+    public function approve(Request $request, $id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        
+        if ($invoice->status !== 'matched') {
+            return back()->with('error', 'Only matched invoices can be posted to the ledger.');
+        }
+
+        if ($invoice->approved_at) {
+            return back()->with('error', 'Invoice already posted to ledger.');
+        }
+
+        DB::transaction(function() use ($invoice) {
+            // Create Journal Entry
+            // Debit: Inventory Asset (Asset increase)
+            // Credit: Accounts Payable (Liability increase)
+            
+            $inventoryAccount = \App\Models\Account::where('category', 'inventory')->first();
+            $apAccount = \App\Models\Account::where('category', 'payable')->first();
+
+            $entry = \App\Models\JournalEntry::create([
+                'entry_date' => now(),
+                'description' => "Purchase of goods via Invoice #{$invoice->invoice_number}",
+                'source_type' => 'invoice',
+                'source_id' => $invoice->id,
+                'created_by' => auth()->id() ?? \App\Models\User::first()->id,
+            ]);
+
+            \App\Models\JournalItem::create([
+                'journal_entry_id' => $entry->id,
+                'account_id' => $inventoryAccount->id,
+                'debit' => $invoice->total_amount,
+                'credit' => 0,
+                'description' => "Inventory replenishment from {$invoice->supplier->name}",
+            ]);
+
+            \App\Models\JournalItem::create([
+                'journal_entry_id' => $entry->id,
+                'account_id' => $apAccount->id,
+                'debit' => 0,
+                'credit' => $invoice->total_amount,
+                'description' => "Debt to {$invoice->supplier->name}",
+            ]);
+
+            // Update Account Balances
+            $inventoryAccount->current_balance = $inventoryAccount->calculateBalance();
+            $inventoryAccount->save();
+            $apAccount->current_balance = $apAccount->calculateBalance();
+            $apAccount->save();
+
+            $invoice->update([
+                'status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => auth()->id() ?? \App\Models\User::first()->id,
+            ]);
+        });
+
+        Cache::tags(['invoices'])->flush();
+        return redirect()->route('invoices.show', $invoice)->with('success', 'Invoice approved and posted to General Ledger.');
+    }
+    public function approveAndPay(Request $request, $id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        $bankAccountId = $request->input('account_id');
+
+        if (!$bankAccountId) {
+            return back()->with('error', 'Please select a bank account for payment.');
+        }
+
+        if ($invoice->status !== 'matched') {
+            return back()->with('error', 'Only matched invoices can be approved.');
+        }
+
+        if ($invoice->approved_at) {
+            return back()->with('error', 'Invoice already approved.');
+        }
+
+        DB::transaction(function() use ($invoice, $bankAccountId) {
+            // 1. APPROVE (Post to Ledger: Inventory vs AP)
+            $inventoryAccount = Account::where('category', 'inventory')->first();
+            $apAccount = Account::where('category', 'payable')->first();
+
+            $approveEntry = JournalEntry::create([
+                'entry_date' => now(),
+                'description' => "Purchase of goods via Invoice #{$invoice->invoice_number}",
+                'source_type' => 'invoice',
+                'source_id' => $invoice->id,
+                'created_by' => auth()->id() ?? User::first()->id,
+            ]);
+
+            JournalItem::create([
+                'journal_entry_id' => $approveEntry->id,
+                'account_id' => $inventoryAccount->id,
+                'debit' => $invoice->total_amount,
+                'credit' => 0,
+                'description' => "Inventory replenishment from {$invoice->supplier->name}",
+            ]);
+
+            JournalItem::create([
+                'journal_entry_id' => $approveEntry->id,
+                'account_id' => $apAccount->id,
+                'debit' => 0,
+                'credit' => $invoice->total_amount,
+                'description' => "Debt to {$invoice->supplier->name}",
+            ]);
+
+            // 2. PAY (Post to Ledger: AP vs Cash/Bank)
+            $cashAccount = Account::findOrFail($bankAccountId);
+            
+            $payment = Payment::create([
+                'invoice_id' => $invoice->id,
+                'account_id' => $bankAccountId,
+                'payment_date' => now(),
+                'amount' => $invoice->total_amount,
+                'payment_method' => 'transfer', 
+                'created_by' => auth()->id() ?? User::first()->id,
+            ]);
+
+            $payEntry = JournalEntry::create([
+                'entry_date' => now(),
+                'description' => "Payment for Invoice #{$invoice->invoice_number}",
+                'source_type' => 'payment',
+                'source_id' => $payment->id,
+                'created_by' => $payment->created_by,
+            ]);
+
+            JournalItem::create([
+                'journal_entry_id' => $payEntry->id,
+                'account_id' => $apAccount->id,
+                'debit' => $invoice->total_amount,
+                'credit' => 0,
+                'description' => $payEntry->description,
+            ]);
+
+            JournalItem::create([
+                'journal_entry_id' => $payEntry->id,
+                'account_id' => $cashAccount->id,
+                'debit' => 0,
+                'credit' => $invoice->total_amount,
+                'description' => $payEntry->description,
+            ]);
+
+            // Update All Balances
+            $inventoryAccount->current_balance = $inventoryAccount->calculateBalance();
+            $inventoryAccount->save();
+            $apAccount->current_balance = $apAccount->calculateBalance();
+            $apAccount->save();
+            $cashAccount->current_balance = $cashAccount->calculateBalance();
+            $cashAccount->save();
+
+            // Update Invoice
+            $invoice->update([
+                'status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => auth()->id() ?? User::first()->id,
+                'payment_status' => 'paid',
+            ]);
+        });
+
+        Cache::tags(['invoices'])->flush();
+        return redirect()->route('invoices.show', $invoice)->with('success', 'Invoice approved and payment successfully recorded.');
     }
 }
