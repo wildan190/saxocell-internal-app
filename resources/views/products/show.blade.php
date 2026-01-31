@@ -149,6 +149,71 @@
         </x-card>
     </div>
 
+    @if($product->hasVariants())
+    <div class="product-variants-section mb-8">
+        <h3 class="section-title">
+            <i data-feather="layers"></i>
+            Product Variants & QR Codes
+        </h3>
+        <div class="variants-grid">
+            @foreach($product->variants as $variant)
+            <div class="variant-card {{ $variant->is_default ? 'default-variant' : '' }}">
+                <div class="variant-qr-section">
+                    <canvas class="qr-code-canvas" data-qr-content="{{ $variant->qr_code_content }}" data-qr-width="150"></canvas>
+                    <div class="qr-actions">
+                        <button class="btn-qr-print" onclick="printQRCode('{{ $variant->qr_code_content }}', '{{ $variant->name }}', '{{ $product->name }}')">
+                            <i data-feather="printer"></i>
+                        </button>
+                        <a href="#" class="btn-qr-download" onclick="downloadQRCode('{{ $variant->qr_code_content }}', '{{ $variant->name }}', '{{ $product->name }}')">
+                            <i data-feather="download"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="variant-info">
+                    <div class="variant-header">
+                        <h4 class="variant-name">{{ $variant->name }}</h4>
+                        @if($variant->is_default)
+                            <span class="default-badge">Default</span>
+                        @endif
+                    </div>
+                    <div class="variant-sku">{{ $variant->sku ?? $product->sku }}</div>
+                    <div class="variant-attributes">
+                        {{ $variant->attributes_summary }}
+                    </div>
+                    <div class="variant-details">
+                        <span class="variant-price">Rp {{ number_format($variant->effective_price, 0, ',', '.') }}</span>
+                        <x-badge type="{{ $variant->stock_quantity > 0 ? 'success' : 'danger' }}">
+                            {{ $variant->stock_quantity }} in stock
+                        </x-badge>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @else
+    <div class="product-qr-section mb-8">
+        <x-card header="Product QR Code">
+            <div class="flex flex-col items-center p-6 bg-white rounded-xl">
+                <canvas id="main-product-qr" data-qr-content="{{ $product->sku ?? "PROD-{$product->id}" }}" data-qr-width="200"></canvas>
+                <div class="mt-4 text-center">
+                    <p class="text-sm font-mono text-slate-500 mb-4">{{ $product->sku ?? "PROD-{$product->id}" }}</p>
+                    <div class="flex gap-4">
+                        <button class="btn-primary" onclick="printQRCode('{{ $product->sku ?? "PROD-{$product->id}" }}', 'Base', '{{ $product->name }}')">
+                            <i data-feather="printer"></i>
+                            Print QR Code
+                        </button>
+                        <button class="btn-secondary" onclick="downloadQRCode('{{ $product->sku ?? "PROD-{$product->id}" }}', 'Base', '{{ $product->name }}')">
+                            <i data-feather="download"></i>
+                            Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </x-card>
+    </div>
+    @endif
+
     <div class="product-metadata">
         <div class="meta-grid">
             <div class="meta-item">
@@ -579,9 +644,17 @@
         color: #991b1b;
     }
 
+    /* Variants Styling */
+    .product-variants-section {
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+    }
+
     .variants-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.5rem;
     }
 
@@ -591,10 +664,12 @@
         border-radius: 12px;
         overflow: hidden;
         transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
     }
 
     .variant-card:hover {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         transform: translateY(-2px);
     }
 
@@ -603,82 +678,103 @@
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
     }
 
-    .variant-image {
-        height: 200px;
-        overflow: hidden;
-    }
-
-    .variant-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .variant-image-placeholder {
-        height: 200px;
+    .variant-qr-section {
+        padding: 1.5rem;
         background: #f8fafc;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+        position: relative;
     }
 
-    .variant-image-placeholder i {
-        width: 48px;
-        height: 48px;
-        margin-bottom: 0.5rem;
+    .qr-code-canvas {
+        max-width: 100%;
+        height: auto !important;
+    }
+
+    .qr-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .btn-qr-print, .btn-qr-download {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-qr-print:hover, .btn-qr-download:hover {
+        color: #3b82f6;
+        border-color: #3b82f6;
+        background: #eff6ff;
     }
 
     .variant-info {
-        padding: 1.5rem;
+        padding: 1.25rem;
     }
 
-    .variant-name {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1e293b;
+    .variant-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
         margin-bottom: 0.5rem;
     }
 
+    .variant-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .default-badge {
+        background: #dbeafe;
+        color: #1d4ed8;
+        font-size: 0.625rem;
+        font-weight: 700;
+        padding: 0.125rem 0.375rem;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+
+    .variant-sku {
+        font-size: 0.75rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+        background: #f1f5f9;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
     .variant-attributes {
-        font-size: 0.875rem;
+        font-size: 0.8125rem;
         color: #64748b;
         margin-bottom: 1rem;
+        min-height: 1.25rem;
     }
 
     .variant-details {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
+        margin-top: auto;
     }
 
     .variant-price {
-        font-size: 1.25rem;
         font-weight: 700;
-        color: #3b82f6;
-    }
-
-    .variant-sku {
-        font-size: 0.75rem;
-        color: #64748b;
-        font-family: 'Monaco', 'Menlo', monospace;
-        background: #f8fafc;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        display: inline-block;
-        margin-bottom: 0.5rem;
-    }
-
-    .default-badge {
-        background: #dbeafe;
-        color: #1d4ed8;
-        font-size: 0.75rem;
-        font-weight: 500;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        display: inline-block;
+        color: #059669;
+        font-size: 0.9375rem;
     }
 </style>
 
@@ -690,6 +786,63 @@
             feather.replace();
         }
     });
+
+    function printQRCode(content, variantName, productName) {
+        const canvas = document.createElement('canvas');
+        QRCode.toCanvas(canvas, content, { width: 300, margin: 2 }, function(error) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            
+            const win = window.open('', '_blank');
+            win.document.write(`
+                <html>
+                <head>
+                    <title>Print QR Code - ${productName}</title>
+                    <style>
+                        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+                        img { width: 300px; height: 300px; }
+                        h1 { font-size: 24px; margin-bottom: 5px; }
+                        p { font-size: 18px; margin-top: 5px; color: #666; }
+                        @media print {
+                            button { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h1>${productName}</h1>
+                    <p>${variantName}</p>
+                    <img src="${canvas.toDataURL()}">
+                    <p style="font-family: monospace;">${content}</p>
+                    <button onclick="window.print()" style="margin-top: 20px; padding: 10px 20px;">Print Now</button>
+                    <script>
+                        window.onload = () => {
+                            // Optional: auto print
+                            // window.print();
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+        });
+    }
+
+    function downloadQRCode(content, variantName, productName) {
+        const canvas = document.createElement('canvas');
+        QRCode.toCanvas(canvas, content, { width: 600, margin: 2 }, function(error) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = `QR_${productName}_${variantName}.png`.replace(/\s+/g, '_');
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
 </script>
 @endpush
 @endsection

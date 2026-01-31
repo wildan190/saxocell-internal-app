@@ -15,6 +15,8 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "feather-icons": "^4.29.2"
+        "feather-icons": "^4.29.2",
+        "html5-qrcode": "^2.3.8",
+        "qrcode": "^1.5.4"
     }
 }

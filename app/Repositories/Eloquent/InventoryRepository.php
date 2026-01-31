@@ -45,16 +45,39 @@ class InventoryRepository implements InventoryRepositoryInterface
 
     protected function updateStock(InventoryTransaction $transaction)
     {
+        $quantity = $transaction->signed_quantity;
+
+        // 1. Update global product/variant stock
         if ($transaction->product_variant_id) {
-            // Update variant stock
             $variant = $transaction->productVariant;
-            $variant->stock_quantity += $transaction->signed_quantity;
+            $variant->stock_quantity += $quantity;
             $variant->save();
         } else {
-            // Update product stock
             $product = $transaction->product;
-            $product->stock_quantity += $transaction->signed_quantity;
+            $product->stock_quantity += $quantity;
             $product->save();
+        }
+
+        // 2. Update Warehouse inventory if warehouse_id is present
+        if ($transaction->warehouse_id) {
+            $inventory = \App\Models\WarehouseInventory::firstOrNew([
+                'warehouse_id' => $transaction->warehouse_id,
+                'product_id' => $transaction->product_id,
+                'product_variant_id' => $transaction->product_variant_id,
+            ]);
+            $inventory->quantity += $quantity;
+            $inventory->save();
+        }
+
+        // 3. Update Store inventory if store_id is present
+        if ($transaction->store_id) {
+            $inventory = \App\Models\StoreInventory::firstOrNew([
+                'store_id' => $transaction->store_id,
+                'product_id' => $transaction->product_id,
+                'product_variant_id' => $transaction->product_variant_id,
+            ]);
+            $inventory->quantity += $quantity;
+            $inventory->save();
         }
     }
 }

@@ -41,7 +41,7 @@ class StockTransferController extends Controller
         if ($sourceWarehouseId) {
             $inventory = WarehouseInventory::where('warehouse_id', $sourceWarehouseId)
                 ->where('quantity', '>', 0)
-                ->with(['product'])
+                ->with(['product', 'productVariant', 'product.variants'])
                 ->get();
         }
 
@@ -55,6 +55,7 @@ class StockTransferController extends Controller
             'destination_store_id' => 'required|exists:stores,id',
             'items' => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_variant_id' => 'nullable|exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
 
@@ -73,6 +74,7 @@ class StockTransferController extends Controller
                 foreach ($validated['items'] as $item) {
                     $whInventory = WarehouseInventory::where('warehouse_id', $validated['source_warehouse_id'])
                         ->where('product_id', $item['product_id'])
+                        ->where('product_variant_id', $item['product_variant_id'] ?? null)
                         ->first();
                     
                     if (!$whInventory || $whInventory->quantity < $item['quantity']) {
@@ -82,6 +84,7 @@ class StockTransferController extends Controller
                     StockTransferItem::create([
                         'stock_transfer_id' => $transfer->id,
                         'product_id' => $item['product_id'],
+                        'product_variant_id' => $item['product_variant_id'] ?? null,
                         'quantity_sent' => $item['quantity'],
                         'quantity_received' => 0,
                     ]);
@@ -90,12 +93,17 @@ class StockTransferController extends Controller
                     $whInventory->decrement('quantity', $item['quantity']);
                     
                     // Decrement Global Stock (temporarily until received)
-                    $whInventory->product->decrement('stock_quantity', $item['quantity']);
+                    if ($item['product_variant_id'] ?? null) {
+                        $whInventory->productVariant->decrement('stock_quantity', $item['quantity']);
+                    } else {
+                        $whInventory->product->decrement('stock_quantity', $item['quantity']);
+                    }
 
                     // Record Out Transaction
                     InventoryTransaction::create([
                         'warehouse_id' => $validated['source_warehouse_id'],
                         'product_id' => $item['product_id'],
+                        'product_variant_id' => $item['product_variant_id'] ?? null,
                         'stock_transfer_id' => $transfer->id,
                         'type' => 'out',
                         'quantity' => $item['quantity'],
@@ -115,7 +123,7 @@ class StockTransferController extends Controller
 
     public function show($id)
     {
-        $transfer = StockTransfer::with(['items.product', 'sourceWarehouse', 'destinationStore'])->findOrFail($id);
+        $transfer = StockTransfer::with(['items.product', 'items.productVariant', 'sourceWarehouse', 'destinationStore'])->findOrFail($id);
         return view('stock-transfers.show', compact('transfer'));
     }
 
@@ -135,19 +143,15 @@ class StockTransferController extends Controller
                     ->where('id', $itemId) // Use ID to be safe
                     ->firstOrFail();
 
-                // Logic: Receiving can be partial? 
-                // For simplicity MVP: Received items go to Store.
-                // Any missing items are 'lost'? Or returned to warehouse?
-                // Let's assume quantity_received <= quantity_sent.
-                
                 $transferItem->quantity_received = $qtyReceived;
                 $transferItem->save();
 
                 if ($qtyReceived > 0) {
-                    // Add to Store Inventory
+                    // Add to Store Inventory (Variant-Aware)
                     $storeInv = StoreInventory::firstOrCreate([
                         'store_id' => $transfer->destination_store_id,
                         'product_id' => $transferItem->product_id,
+                        'product_variant_id' => $transferItem->product_variant_id,
                     ], ['quantity' => 0]);
                     
                     $storeInv->increment('quantity', $qtyReceived);
@@ -156,6 +160,7 @@ class StockTransferController extends Controller
                     InventoryTransaction::create([
                         'store_id' => $transfer->destination_store_id,
                         'product_id' => $transferItem->product_id,
+                        'product_variant_id' => $transferItem->product_variant_id,
                         'stock_transfer_id' => $transfer->id,
                         'type' => 'in',
                         'quantity' => $qtyReceived,
@@ -163,24 +168,13 @@ class StockTransferController extends Controller
                         'notes' => 'Transfer In from Warehouse',
                     ]);
                     
-                     // Update Product Total Stock (Global)?
-                     // Moving Warehouse -> Store doesn't change global total generally.
-                     // But if some items are lost (sent 10, received 9), then global total decreases.
-                     // Original deduction from warehouse: -10 to global?
-                     // If I rely on sum(warehouse) + sum(store), then I don't need to touch global.
-                     // But Product::stock_quantity is a cache.
-                     // When I deducted from Warehouse, I should have decreased global.
-                     // When I add to Store, I increase global.
-                     // Net effect: -10 + 9 = -1. Correct.
-                     
-                     // I didn't decrease global in `store` method. I should fix that or add an observer.
-                     // Let's do it manually for now.
-                     
-                     $transferItem->product->increment('stock_quantity', $qtyReceived);
+                    // Update Product/Variant Total Stock (Global)
+                    if ($transferItem->product_variant_id) {
+                        $transferItem->productVariant->increment('stock_quantity', $qtyReceived);
+                    } else {
+                        $transferItem->product->increment('stock_quantity', $qtyReceived);
+                    }
                 }
-                
-                // Handle the sent items deduction from global stock
-                // In store(), I decremented Warehouse. I should also decrement Global there.
             }
             
             $transfer->update(['status' => 'received']);
@@ -193,7 +187,8 @@ class StockTransferController extends Controller
     {
         $stores = Store::all();
         $warehouses = Warehouse::all();
-        return view('stock-transfers.create_request', compact('stores', 'warehouses'));
+        $products = Product::with('variants')->orderBy('name')->get();
+        return view('stock-transfers.create_request', compact('stores', 'warehouses', 'products'));
     }
 
     public function storeRequest(Request $request)
@@ -203,6 +198,7 @@ class StockTransferController extends Controller
             'destination_store_id' => 'required|exists:stores,id',
             'items' => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_variant_id' => 'nullable|exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
 
@@ -220,6 +216,7 @@ class StockTransferController extends Controller
                 StockTransferItem::create([
                     'stock_transfer_id' => $transfer->id,
                     'product_id' => $item['product_id'],
+                    'product_variant_id' => $item['product_variant_id'] ?? null,
                     'quantity_sent' => $item['quantity'],
                     'quantity_received' => 0,
                 ]);
@@ -252,30 +249,36 @@ class StockTransferController extends Controller
                     
                     $whInventory = WarehouseInventory::where('warehouse_id', $transfer->source_warehouse_id)
                         ->where('product_id', $item->product_id)
+                        ->where('product_variant_id', $item->product_variant_id)
                         ->first();
                     
                     if (!$whInventory) {
-                        Log::error('Inventory not found', ['wh_id' => $transfer->source_warehouse_id, 'prod_id' => $item->product_id]);
-                        throw new \Exception('Inventory record not found for product ID: ' . $item->product_id);
+                        Log::error('Inventory not found', ['wh_id' => $transfer->source_warehouse_id, 'prod_id' => $item->product_id, 'variant_id' => $item->product_variant_id]);
+                        throw new \Exception('Inventory record not found for requested item.');
                     }
                     
                     Log::info('Inventory Found', ['current_qty' => $whInventory->quantity]);
 
                     if ($whInventory->quantity < $item->quantity_sent) {
                         Log::error('Insufficient stock', ['avail' => $whInventory->quantity, 'req' => $item->quantity_sent]);
-                        throw new \Exception("Insufficient stock in warehouse. Available: {$whInventory->quantity}, Requested: {$item->quantity_sent}");
+                        throw new \Exception("Insufficient stock in warehouse for " . ($item->productVariant ? $item->productVariant->name : $item->product->name));
                     }
 
                     // Deduct from Warehouse
                     $whInventory->decrement('quantity', $item->quantity_sent);
                     
                     // Decrement Global Stock
-                    $whInventory->product->decrement('stock_quantity', $item->quantity_sent);
+                    if ($item->product_variant_id) {
+                        $item->productVariant->decrement('stock_quantity', $item->quantity_sent);
+                    } else {
+                        $item->product->decrement('stock_quantity', $item->quantity_sent);
+                    }
 
                     // Record Out Transaction
                     InventoryTransaction::create([
                         'warehouse_id' => $transfer->source_warehouse_id,
                         'product_id' => $item->product_id,
+                        'product_variant_id' => $item->product_variant_id,
                         'stock_transfer_id' => $transfer->id,
                         'type' => 'out',
                         'quantity' => $item->quantity_sent,

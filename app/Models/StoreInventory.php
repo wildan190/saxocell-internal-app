@@ -13,6 +13,7 @@ class StoreInventory extends Model
     protected $fillable = [
         'store_id',
         'product_id',
+        'product_variant_id',
         'quantity',
         'is_active',
     ];
@@ -29,5 +30,10 @@ class StoreInventory extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function productVariant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class);
     }
 }

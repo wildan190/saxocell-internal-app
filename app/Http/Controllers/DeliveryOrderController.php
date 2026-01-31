@@ -28,7 +28,7 @@ class DeliveryOrderController extends Controller
                 ->findOrFail($request->po_id);
         }
 
-        $purchaseOrders = PurchaseOrder::whereIn('status', ['approved', 'partial'])->get();
+        $purchaseOrders = PurchaseOrder::whereIn('status', ['approved', 'partial'])->with('supplier')->get();
         $warehouses = \App\Models\Warehouse::all();
         return view('procurement.delivery-orders.create', compact('purchaseOrders', 'selectedPo', 'warehouses'));
     }
@@ -150,6 +150,7 @@ class DeliveryOrderController extends Controller
                         $whInv = \App\Models\WarehouseInventory::firstOrCreate([
                             'warehouse_id' => $data['warehouse_id'],
                             'product_id' => $poItem->product_id,
+                            'product_variant_id' => $poItem->product_variant_id,
                         ], ['quantity' => 0]);
                         $whInv->increment('quantity', $itemData['quantity_accepted']);
                     }

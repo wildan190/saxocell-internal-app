@@ -43,33 +43,50 @@ class StockOpnameController extends Controller
             ]);
 
             // Snapshot current inventory
-            $products = Product::all(); // Should filter active?
-            // Determine system qty for each product in this warehouse
+            $products = Product::with('variants')->get();
+            
+            // Determine system qty for each product/variant in this warehouse
             $inventory = WarehouseInventory::where('warehouse_id', $validated['warehouse_id'])
-                ->pluck('quantity', 'product_id');
+                ->get()
+                ->groupBy('product_id');
 
             foreach ($products as $product) {
-                StockOpnameItem::create([
-                    'stock_opname_id' => $opname->id,
-                    'product_id' => $product->id,
-                    'system_qty' => $inventory[$product->id] ?? 0,
-                    'actual_qty' => null, // To be filled
-                    'difference' => null,
-                ]);
+                if ($product->variants->isNotEmpty()) {
+                    foreach ($product->variants as $variant) {
+                        $variantInventory = $inventory->get($product->id)?->where('product_variant_id', $variant->id)->first();
+                        
+                        StockOpnameItem::create([
+                            'stock_opname_id' => $opname->id,
+                            'product_id' => $product->id,
+                            'product_variant_id' => $variant->id,
+                            'system_qty' => $variantInventory->quantity ?? 0,
+                            'actual_qty' => null,
+                            'difference' => null,
+                        ]);
+                    }
+                } else {
+                    $baseInventory = $inventory->get($product->id)?->where('product_variant_id', null)->first();
+                    
+                    StockOpnameItem::create([
+                        'stock_opname_id' => $opname->id,
+                        'product_id' => $product->id,
+                        'product_variant_id' => null,
+                        'system_qty' => $baseInventory->quantity ?? 0,
+                        'actual_qty' => null,
+                        'difference' => null,
+                    ]);
+                }
             }
         });
 
         return redirect()->route('stock-opnames.index')
-            ->with('success', 'Stock Opname session created. ready to input counts.');
+            ->with('success', 'Stock Opname session created. Ready to input counts.');
     }
 
     public function show(StockOpname $id)
     {
-        // $id is implicitly bound but naming it $opname would be better, using $id to match route param if needed or relying on Laravel binding
-        // Route is resource-like but defined manually as get /stock-opnames/{id}
-        // Let's assume standard binding work if I typehint
         $opname = $id; 
-        $opname->load(['warehouse', 'items.product']);
+        $opname->load(['warehouse', 'items.product', 'items.productVariant']);
         return view('stock-opnames.show', compact('opname'));
     }
 
@@ -87,17 +104,16 @@ class StockOpnameController extends Controller
             foreach ($items as $itemId => $data) {
                 $item = StockOpnameItem::findOrFail($itemId);
                 
-                // Validate that item belongs to this opname
                 if ($item->stock_opname_id !== $opname->id) continue;
 
-                $actualQty = $data['actual_qty'] ?? 0; // Default to 0? Or require input?
-                // Let's assume 0 if empty, strictly speaking opname means counting everything.
+                $actualQty = $data['actual_qty'];
+                if ($actualQty === null || $actualQty === '') continue; // Skip if not counted? Or assume 0?
+                // For opname, if it's in the list, we should probably have a value.
                 
                 $item->actual_qty = $actualQty;
                 $item->difference = $actualQty - $item->system_qty;
                 $item->save();
 
-                // If difference exists, create adjustment
                 if ($item->difference != 0) {
                     $this->createAdjustment($opname, $item);
                 }
@@ -116,45 +132,40 @@ class StockOpnameController extends Controller
         InventoryTransaction::create([
             'warehouse_id' => $opname->warehouse_id,
             'product_id' => $item->product_id,
+            'product_variant_id' => $item->product_variant_id,
             'stock_opname_id' => $opname->id,
             'type' => 'adjustment',
-            'quantity' => abs($item->difference), // Transaction tracks absolute magnitude? 
-            // Wait, InventoryTransaction usually has 'type' (in/out/adjustment).
-            // Adjustment logic: if diff is +5 (found 5 more), we need to add 5.
-            // If diff is -5 (lost 5), we need to remove 5.
-            // My model logic: getSignedQuantityAttribute() logic:
-            // 'adjustment' => $this->quantity.
-            // So if I set quantity to -5, signed is -5.
-            // So I should store the signed difference directly? 
-            // Or store absolute and use another field?
-            // The table schema has 'quantity' as integer.
-            // The model `getSignedQuantityAttribute` says:
-            // 'adjustment' => $this->quantity.
-			// So I should store negative value if negative adjustment.
             'quantity' => $item->difference,
             'reference_number' => 'OPNAME-' . $opname->id,
             'notes' => 'Stock Opname Adjustment',
         ]);
 
         // Update Warehouse Inventory
-        $inventory = WarehouseInventory::firstOrNew([
-            'warehouse_id' => $opname->warehouse_id,
-            'product_id' => $item->product_id,
-        ]);
-        $inventory->quantity = $item->actual_qty; // Directly set to actual? Or add difference?
-        // Set to actual is safer/more correct for opname.
-        $inventory->save();
+        $inventory = WarehouseInventory::updateOrCreate(
+            [
+                'warehouse_id' => $opname->warehouse_id,
+                'product_id' => $item->product_id,
+                'product_variant_id' => $item->product_variant_id,
+            ],
+            [
+                'quantity' => $item->actual_qty,
+            ]
+        );
 
-        // Update Product Total Stock (optional, if cached)
-        // Ignoring for now or relying on accessors.
-        // Actually Product::total_stock is an accessor so it calculates on fly if hasVariants.
-        // But if `stock_quantity` column exists on products table, it needs sync?
-        // Implementation plan said: "I will maintain stock_quantity on products as a "Global Total"".
-        // So yes, I should update it.
-        $product = $item->product;
-        // Re-calculate total from all warehouses? Or just adjust?
-        // Adjust is faster.
-        $product->stock_quantity += $item->difference;
-        $product->save();
+        // Update Product or Variant Total Stock
+        if ($item->product_variant_id) {
+            $variant = $item->productVariant;
+            $variant->stock_quantity += $item->difference;
+            $variant->save();
+            
+            // Product total stock is an accessor or needs update too?
+            // If product has variants, stock_quantity on product table might be unused or aggregate.
+            // Earlier implementation said: "Product::total_stock is an accessor"
+            // But let's see Product model again.
+        } else {
+            $product = $item->product;
+            $product->stock_quantity += $item->difference;
+            $product->save();
+        }
     }
 }

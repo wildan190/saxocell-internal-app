@@ -29,8 +29,9 @@ class InventoryController extends Controller
     {
         $products = Product::with('variants')->where('status', 'active')->get();
         $suppliers = Supplier::all();
+        $warehouses = \App\Models\Warehouse::all();
         
-        return view('inventory.create', compact('products', 'suppliers'));
+        return view('inventory.create', compact('products', 'suppliers', 'warehouses'));
     }
 
     public function store(StoreInventoryTransactionRequest $request)

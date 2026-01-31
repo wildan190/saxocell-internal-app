@@ -119,9 +119,14 @@
                                 <span class="p-2 bg-white rounded-xl shadow-sm"><i data-feather="package" class="w-5 h-5 text-slate-500"></i></span>
                                 Inventory Selection
                             </h3>
-                            <div class="relative">
-                                <i data-feather="search" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
-                                <input type="text" id="inventorySearch" placeholder="Filter items..." class="pl-12 pr-6 py-2 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none">
+                            <div class="flex items-center gap-4">
+                                <button type="button" onclick="startDirectTransferScan()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-blue-100 flex items-center gap-2">
+                                    <i data-feather="maximize" class="w-4 h-4"></i> DISPATCH VIA SCAN
+                                </button>
+                                <div class="relative">
+                                    <i data-feather="search" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                                    <input type="text" id="inventorySearch" placeholder="Filter items..." class="pl-12 pr-6 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none w-64 transition-all">
+                                </div>
                             </div>
                         </div>
 
@@ -137,18 +142,25 @@
                                 </thead>
                                 <tbody class="divide-y divide-slate-50">
                                     @forelse($inventory as $index => $item)
-                                    <tr class="group hover:bg-slate-50/30 transition-all duration-200">
+                                    @php $sku = $item->productVariant?->sku ?? ($item->product?->sku ?? ''); @endphp
+                                    <tr class="group hover:bg-slate-50/30 transition-all duration-200 inventory-row" data-sku="{{ $sku }}">
                                         <td class="px-8 py-5">
                                             <label class="relative flex items-center cursor-pointer">
-                                                <input type="checkbox" name="items[{{ $index }}][selected]" class="sr-only peer item-select" data-index="{{ $index }}">
+                                                <input type="checkbox" name="items[{{ $index }}][selected]" id="check-{{ $index }}" class="sr-only peer item-select" data-index="{{ $index }}">
                                                 <div class="w-12 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 transition-colors"></div>
                                                 <input type="hidden" name="items[{{ $index }}][product_id]" value="{{ $item->product_id }}" disabled class="item-input-{{ $index }}">
+                                                <input type="hidden" name="items[{{ $index }}][product_variant_id]" value="{{ $item->product_variant_id }}" disabled class="item-input-{{ $index }}">
                                             </label>
                                         </td>
                                         <td class="px-8 py-5">
                                             <div class="flex flex-col">
                                                 <span class="font-black text-slate-800 leading-tight">{{ $item->product->name }}</span>
-                                                <span class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-widest mt-1">{{ $item->product->sku }}</span>
+                                                @if($item->productVariant)
+                                                    <span class="text-[10px] font-bold text-slate-400 uppercase mt-1">
+                                                        <i data-feather="layers" class="w-3 h-3 inline"></i> {{ $item->productVariant->name }}
+                                                    </span>
+                                                @endif
+                                                <span class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-widest mt-1">{{ $sku }}</span>
                                             </div>
                                         </td>
                                         <td class="px-8 py-5 text-center">
@@ -158,6 +170,7 @@
                                             <div class="flex justify-end">
                                                 <input type="number" 
                                                        name="items[{{ $index }}][quantity]" 
+                                                       id="qty-{{ $index }}"
                                                        class="w-32 px-4 py-2 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 focus:bg-white rounded-xl font-black text-slate-800 text-right transition-all outline-none disabled:opacity-30 disabled:cursor-not-allowed item-qty item-input-{{ $index }}" 
                                                        min="1" 
                                                        max="{{ $item->quantity }}" 
@@ -214,26 +227,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('inventorySearch');
     const tableRows = document.querySelectorAll('#inventoryTable tbody tr');
 
+    function syncRowState(cb) {
+        const index = cb.dataset.index;
+        const row = cb.closest('tr');
+        const inputs = document.querySelectorAll('.item-input-' + index);
+        
+        if (cb.checked) {
+            row.classList.add('bg-blue-50/50', 'border-blue-100');
+        } else {
+            row.classList.remove('bg-blue-50/50', 'border-blue-100');
+        }
+
+        inputs.forEach(input => {
+            input.disabled = !cb.checked;
+            if (!cb.checked && input.classList.contains('item-qty')) {
+                input.value = '';
+            }
+        });
+        
+        updateSummary();
+    }
+
     checkboxes.forEach(cb => {
         cb.addEventListener('change', function() {
-            const index = this.dataset.index;
-            const row = this.closest('tr');
-            const inputs = document.querySelectorAll('.item-input-' + index);
-            
-            if (this.checked) {
-                row.classList.add('bg-blue-50/50', 'border-blue-100');
-            } else {
-                row.classList.remove('bg-blue-50/50', 'border-blue-100');
-            }
-
-            inputs.forEach(input => {
-                input.disabled = !this.checked;
-                if (!this.checked && input.classList.contains('item-qty')) {
-                    input.value = '';
-                }
-            });
-            
-            updateSummary();
+            syncRowState(this);
         });
     });
 
@@ -250,6 +267,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 summaryText.classList.replace('text-slate-400', 'text-blue-600');
             }
         }
+    }
+
+    window.startDirectTransferScan = function() {
+        window.openQRScanner((sku) => {
+            let found = false;
+            tableRows.forEach(row => {
+                if (row.dataset.sku === sku) {
+                    const cb = row.querySelector('.item-select');
+                    const qtyInput = row.querySelector('.item-qty');
+                    
+                    if (!cb.checked) {
+                        cb.checked = true;
+                        syncRowState(cb);
+                    }
+                    
+                    qtyInput.value = (parseInt(qtyInput.value) || 0) + 1;
+                    const max = parseInt(qtyInput.max);
+                    if (qtyInput.value > max) qtyInput.value = max;
+                    
+                    // Visual feedback
+                    row.style.backgroundColor = '#ecfdf5';
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => row.style.backgroundColor = '', 500);
+                    found = true;
+                }
+            });
+
+            if (!found) {
+                alert("SKU '" + sku + "' not found in current warehouse inventory.");
+            }
+
+            // Continuous scan
+            setTimeout(() => startDirectTransferScan(), 600);
+        });
     }
 
     if (searchInput) {

@@ -13,6 +13,7 @@ class StockOpnameItem extends Model
     protected $fillable = [
         'stock_opname_id',
         'product_id',
+        'product_variant_id',
         'system_qty',
         'actual_qty',
         'difference',
@@ -26,5 +27,10 @@ class StockOpnameItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function productVariant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class);
     }
 }

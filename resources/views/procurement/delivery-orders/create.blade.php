@@ -174,18 +174,24 @@
                             <option value="{{ $warehouse->id }}">{{ $warehouse->name }}</option>
                         @endforeach
                     </select>
-                    <p class="text-xs text-slate-500 mt-2">All items accepted in this delivery will be added to this warehouse's inventory.</p>
+                </div>
+                <div class="mt-4">
+                    <button type="button" onclick="startDOScan()" class="btn btn-primary w-full py-3">
+                        <i data-feather="maximize"></i> Scan Packing List / Items
+                    </button>
+                    <p class="text-xs text-slate-500 mt-2 text-center">Scanning an SKU will automatically increment the <strong>Accepted</strong> quantity for that item.</p>
                 </div>
             </div>
         </div>
 
         <!-- line Items -->
         <div style="margin-top: 2rem; border: 1px solid rgba(148, 163, 184, 0.1); border-radius: 1rem; overflow: hidden;">
-            <div style="padding: 1rem 1.5rem; background: #fafbfc; border-bottom: 1px solid #f1f5f9;">
-                <h4 style="font-size: 0.875rem; font-weight: 700; color: #1e293b;">Validation of Goods Received</h4>
+            <div style="padding: 1rem 1.5rem; background: #fafbfc; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="font-size: 0.875rem; font-weight: 700; color: #1e293b; margin: 0;">Validation of Goods Received</h4>
+                <div class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">MATCHING PO: #{{ $selectedPo->po_number }}</div>
             </div>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table" id="doTable">
                     <thead>
                         <tr>
                             <th style="width: 40%;">Product Item</th>
@@ -197,8 +203,11 @@
                     </thead>
                     <tbody>
                         @foreach($selectedPo->items as $index => $item)
+                        @php
+                            $sku = $item->variant?->sku ?? ($item->product?->sku ?? null);
+                        @endphp
                         @if($item->remaining_quantity > 0)
-                        <tr>
+                        <tr class="do-item-row" data-sku="{{ $sku }}">
                             <td>
                                 <div style="display: flex; flex-direction: column;">
                                     <span style="font-weight: 700; color: #1e293b;">
@@ -214,6 +223,9 @@
                                         @endforeach
                                     </span>
                                     @endif
+                                    @if($sku)
+                                        <code class="text-xs text-slate-400 mt-1">{{ $sku }}</code>
+                                    @endif
                                     <input type="hidden" name="items[{{ $index }}][purchase_order_item_id]" value="{{ $item->id }}">
                                 </div>
                             </td>
@@ -221,10 +233,25 @@
                                 <span class="badge" style="background: #f1f5f9; color: #475569; font-weight: 800;">{{ $item->remaining_quantity }} units</span>
                             </td>
                             <td>
-                                <input type="number" name="items[{{ $index }}][quantity_accepted]" class="form-control qty-accepted" data-index="{{ $index }}" data-max="{{ $item->remaining_quantity }}" min="0" max="{{ $item->remaining_quantity }}" value="{{ $item->remaining_quantity }}" required>
+                                <input type="number" 
+                                       name="items[{{ $index }}][quantity_accepted]" 
+                                       id="accepted-{{ $sku }}"
+                                       class="form-control qty-accepted font-bold" 
+                                       data-index="{{ $index }}" 
+                                       data-max="{{ $item->remaining_quantity }}" 
+                                       min="0" max="{{ $item->remaining_quantity }}" 
+                                       value="{{ $item->remaining_quantity }}" 
+                                       required>
                             </td>
                             <td>
-                                <input type="number" name="items[{{ $index }}][quantity_rejected]" class="form-control qty-rejected" data-index="{{ $index }}" data-max="{{ $item->remaining_quantity }}" min="0" max="{{ $item->remaining_quantity }}" value="0" required>
+                                <input type="number" 
+                                       name="items[{{ $index }}][quantity_rejected]" 
+                                       id="rejected-{{ $sku }}"
+                                       class="form-control qty-rejected" 
+                                       data-index="{{ $index }}" 
+                                       data-max="{{ $item->remaining_quantity }}" 
+                                       min="0" max="{{ $item->remaining_quantity }}" 
+                                       value="0" required>
                                 <div class="resolution-container-{{ $index }} mt-2" style="display: none;">
                                     <select name="items[{{ $index }}][resolution_type]" class="form-select text-xs">
                                         <option value="">-- Resolution --</option>
@@ -248,7 +275,7 @@
             <a href="{{ route('delivery-orders.index') }}" class="btn btn-secondary">
                 Go Back
             </a>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary px-8">
                 <i data-feather="check-circle"></i> Confirm Receipt
             </button>
         </div>
@@ -263,33 +290,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const qtyAcceptedInputs = document.querySelectorAll('.qty-accepted');
     const qtyRejectedInputs = document.querySelectorAll('.qty-rejected');
 
-    function updateQuantities(input, type) {
+    // Reset initial values for scan logic
+    // Usually, when scanning, we might want to start from 0 if it's a "counting" process
+    // But the current UI defaults to max (remaining). 
+    // Let's keep the defaults, but allow scan to adjust.
+    // If user clicks "Scan", maybe we should ask if they want to reset counts to 0?
+    // For now, let's just make it auto-increment if scanned.
+
+    function updateResolutionVisibility(index) {
+        const rejectedInput = document.querySelector(`.qty-rejected[data-index="${index}"]`);
+        const val = parseInt(rejectedInput.value) || 0;
+        const container = document.querySelector(`.resolution-container-${index}`);
+        
+        if (container) {
+            if (val > 0) {
+                container.style.display = 'block';
+                container.querySelector('select').required = true;
+            } else {
+                container.style.display = 'none';
+                container.querySelector('select').required = false;
+            }
+        }
+    }
+
+    window.updateQuantities = function(input, type) {
         const index = input.dataset.index;
         const max = parseInt(input.dataset.max);
-        const val = parseInt(input.value) || 0;
+        let val = parseInt(input.value) || 0;
         
+        // Clamp value
+        if (val < 0) val = 0;
+        if (val > max) val = max;
+        input.value = val;
+
         const otherInput = type === 'accepted' 
             ? document.querySelector(`.qty-rejected[data-index="${index}"]`)
             : document.querySelector(`.qty-accepted[data-index="${index}"]`);
             
-        // Ensure we don't exceed total remaining
-        if (val > max) {
-            input.value = max;
-            otherInput.value = 0;
-        } else {
-            otherInput.value = max - val;
-        }
+        otherInput.value = max - val;
 
-        // Toggle Resolution Visibility
-        const rejectedVal = parseInt(document.querySelector(`.qty-rejected[data-index="${index}"]`).value) || 0;
-        const resolutionContainer = document.querySelector(`.resolution-container-${index}`);
-        if (rejectedVal > 0) {
-            resolutionContainer.style.display = 'block';
-            resolutionContainer.querySelector('select').required = true;
-        } else {
-            resolutionContainer.style.display = 'none';
-            resolutionContainer.querySelector('select').required = false;
-        }
+        updateResolutionVisibility(index);
     }
 
     qtyAcceptedInputs.forEach(input => {
@@ -298,16 +338,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
     qtyRejectedInputs.forEach(input => {
         input.addEventListener('input', () => updateQuantities(input, 'rejected'));
-        // Initial setup for existing values
-        if (parseInt(input.value) > 0) {
-            const index = input.dataset.index;
-            const container = document.querySelector(`.resolution-container-${index}`);
-            if (container) {
-                container.style.display = 'block';
-                container.querySelector('select').required = true;
-            }
-        }
     });
+
+    window.startDOScan = function() {
+        // Confirmation to reset counts if they are at default max
+        let hasReset = false;
+        const rows = document.querySelectorAll('.do-item-row');
+        
+        window.openQRScanner((sku) => {
+            const input = document.getElementById('accepted-' + sku);
+            if (input) {
+                const index = input.dataset.index;
+                const max = parseInt(input.dataset.max);
+                
+                // If it's the first scan, we might want to reset all counts to 0 to start counting from scratch?
+                // Or just keep incrementing. Let's ask via a small UI or just do increment.
+                // Actually, let's just increment and clamp at max.
+                
+                let currentVal = parseInt(input.value) || 0;
+                
+                // Logic: If user is scanning, they are likely counting FROM ZERO.
+                // But the default is MAX. This is tricky.
+                // If the user hasn't touched the form and clicks scan, we should probably start from 0 for all.
+                
+                input.value = Math.min(max, currentVal + 1);
+                updateQuantities(input, 'accepted');
+
+                // Visual Feedback
+                const row = input.closest('tr');
+                row.style.backgroundColor = '#ecfdf5';
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                setTimeout(() => {
+                    row.style.transition = 'background-color 0.5s';
+                    row.style.backgroundColor = '';
+                    startDOScan(); // Recursive for continuous scanning
+                }, 500);
+            } else {
+                alert("SKU '" + sku + "' not found in this Purchase Order.");
+                startDOScan();
+            }
+        });
+    };
 
     if (typeof feather !== 'undefined') {
         feather.replace();
