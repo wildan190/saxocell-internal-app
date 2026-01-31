@@ -168,7 +168,7 @@ class DeliveryOrderController extends Controller
             $po->update(['status' => $po->isFullyResolved() ? 'completed' : 'partial']);
             
             DB::commit();
-            return redirect()->route('delivery-orders.index')->with('success', 'Goods received and inventory updated. PO status: ' . strtoupper($po->status));
+            return redirect()->route('delivery-orders.show', $do)->with('success', 'Goods received and inventory updated. PO status: ' . strtoupper($po->status));
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to record delivery: ' . $e->getMessage())->withInput();

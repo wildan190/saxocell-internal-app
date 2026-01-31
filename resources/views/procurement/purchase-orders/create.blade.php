@@ -227,7 +227,7 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    (function() {
         const itemsTable = document.getElementById('itemsTable');
         const itemsBody = itemsTable.getElementsByTagName('tbody')[0];
         const addItemBtn = document.getElementById('addItem');
@@ -395,6 +395,6 @@
         // Initialize
         checkEmptyState();
         addItemBtn.click(); // Add first row
-    });
+    })();
 </script>
 @endpush

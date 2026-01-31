@@ -37,6 +37,20 @@
         </div>
         
         <div class="flex flex-wrap gap-3">
+            @php
+                $hasInvoice = \App\Models\Invoice::where('purchase_order_id', $do->purchase_order_id)->exists();
+            @endphp
+            
+            @if(!$hasInvoice)
+                <a href="{{ route('invoices.create', ['po_id' => $do->purchase_order_id]) }}" class="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95">
+                    <i data-feather="send" class="w-4 h-4"></i> Send to Finance
+                </a>
+            @else
+                <a href="{{ route('invoices.show', \App\Models\Invoice::where('purchase_order_id', $do->purchase_order_id)->first()->id) }}" class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                    <i data-feather="file-text" class="w-4 h-4"></i> View Invoice
+                </a>
+            @endif
+
             <button class="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-xl font-bold shadow-sm transition-all active:scale-95" onclick="window.print()">
                 <i data-feather="printer" class="w-4 h-4"></i> Print Receipt
             </button>

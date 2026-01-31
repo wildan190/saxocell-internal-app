@@ -421,6 +421,26 @@
     .empty-icon i {
         @apply w-16 h-16;
     }
+
+    /* Skeleton Loading Evolution */
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
+    .skeleton-box {
+        @apply relative overflow-hidden bg-slate-100 rounded-2xl;
+    }
+
+    .skeleton-box::after {
+        @apply absolute inset-0 content-[''];
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        animation: shimmer 1.5s infinite;
+    }
+
+    .skeleton-title { @apply h-10 w-1/3 mb-6; }
+    .skeleton-text { @apply h-4 w-full mb-3; }
+    .skeleton-btn { @apply h-12 w-32; }
 }
 
 @media (max-width: 1024px) {
