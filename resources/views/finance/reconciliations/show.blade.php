@@ -15,6 +15,13 @@
                     <h1 class="text-3xl font-black text-slate-900 leading-tight">{{ $reconciliation->account->name }}</h1>
                     <p class="text-slate-500 font-bold uppercase tracking-wider text-xs">Statement Date: {{ $reconciliation->statement_date->format('M d, Y') }}</p>
                 </div>
+                @if($reconciliation->status === 'draft')
+                <div class="ml-auto">
+                    <a href="{{ route('finance.reconciliations.edit', $reconciliation) }}" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-colors" title="Edit Details">
+                        <i data-feather="settings" class="w-5 h-5"></i>
+                    </a>
+                </div>
+                @endif
             </div>
 
             <div class="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-xl">

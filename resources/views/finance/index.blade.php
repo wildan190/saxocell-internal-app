@@ -13,6 +13,12 @@
         </div>
         
         <div class="flex gap-4">
+            <a href="{{ route('finance.income.create') }}" class="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-emerald-200/50">
+                <i data-feather="dollar-sign" class="w-4 h-4"></i> Record Income
+            </a>
+            <a href="{{ route('finance.transfers.create') }}" class="flex items-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm transition-all active:scale-95">
+                <i data-feather="repeat" class="w-4 h-4"></i> Transfer Funds
+            </a>
             <a href="{{ route('finance.journals.create') }}" class="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-blue-200/50">
                 <i data-feather="plus-circle" class="w-4 h-4"></i> New Journal Entry
             </a>

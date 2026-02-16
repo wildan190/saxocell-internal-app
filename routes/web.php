@@ -5,15 +5,17 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InventoryController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [\App\Http\Controllers\LauncherController::class, 'index'])->name('root');
 
-Route::get('/home', function () {
+Route::get('/home', [\App\Http\Controllers\LauncherController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('home');
+
+Route::get('/dashboard', function () {
     $needsReviewCount = \App\Models\Product::needsReview()->count();
     $productsNeedingReview = \App\Models\Product::needsReview()->latest()->take(5)->get();
     return view('home', compact('needsReviewCount', 'productsNeedingReview'));
-})->middleware(['auth'])->name('home');
+})->middleware(['auth'])->name('dashboard');
 
 // Products Routes
 Route::middleware(['auth'])->group(function () {
@@ -78,8 +80,25 @@ Route::middleware(['auth'])->group(function () {
     // Stores
     // Stores
     Route::put('stores/{store}/inventory/{inventory}/toggle-status', [\App\Http\Controllers\StoreController::class, 'toggleInventoryStatus'])->name('stores.inventory.toggle-status');
+    
+    // Store Finance Routes
+    Route::prefix('stores/{store}')->name('stores.')->group(function() {
+        Route::get('income', [\App\Http\Controllers\Store\StoreFinanceController::class, 'createIncome'])->name('income.create');
+        Route::post('income', [\App\Http\Controllers\Store\StoreFinanceController::class, 'storeIncome'])->name('income.store');
+        Route::get('transfer', [\App\Http\Controllers\Store\StoreFinanceController::class, 'createTransfer'])->name('transfer.create');
+        Route::post('transfer', [\App\Http\Controllers\Store\StoreFinanceController::class, 'storeTransfer'])->name('transfer.store');
+    });
+
     Route::resource('stores', \App\Http\Controllers\StoreController::class);
     
+    // Warehouse Finance Routes
+    Route::prefix('warehouses/{warehouse}')->name('warehouses.')->group(function() {
+        Route::get('income', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'createIncome'])->name('income.create');
+        Route::post('income', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'storeIncome'])->name('income.store');
+        Route::get('transfer', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'createTransfer'])->name('transfer.create');
+        Route::post('transfer', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'storeTransfer'])->name('transfer.store');
+    });
+
     // Stock Transfers
     Route::get('/stock-transfers/create-request', [\App\Http\Controllers\StockTransferController::class, 'createRequest'])->name('stock-transfers.create-request');
     Route::post('/stock-transfers/request', [\App\Http\Controllers\StockTransferController::class, 'storeRequest'])->name('stock-transfers.store-request');
@@ -111,6 +130,14 @@ Route::middleware(['auth'])->group(function () {
         // General Ledger - Journal Entries
         Route::resource('journals', \App\Http\Controllers\Finance\JournalController::class);
         
+        // Transfers
+        Route::get('transfers/create', [\App\Http\Controllers\Finance\TransferController::class, 'create'])->name('transfers.create');
+        Route::post('transfers', [\App\Http\Controllers\Finance\TransferController::class, 'store'])->name('transfers.store');
+
+        // Income
+        Route::get('income/create', [\App\Http\Controllers\Finance\IncomeController::class, 'create'])->name('income.create');
+        Route::post('income', [\App\Http\Controllers\Finance\IncomeController::class, 'store'])->name('income.store');
+        
         // Account Payable (Invoices & Payments)
         Route::get('payables', [\App\Http\Controllers\Finance\PaymentController::class, 'payables'])->name('payables');
         Route::get('payables/{invoice}/pay', [\App\Http\Controllers\Finance\PaymentController::class, 'create'])->name('payments.create');
@@ -124,6 +151,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reconciliations/create', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'create'])->name('reconciliations.create');
         Route::post('reconciliations', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'store'])->name('reconciliations.store');
         Route::get('reconciliations/{reconciliation}', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'show'])->name('reconciliations.show');
+        Route::get('reconciliations/{reconciliation}/edit', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'edit'])->name('reconciliations.edit');
+        Route::put('reconciliations/{reconciliation}', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'update'])->name('reconciliations.update');
+        Route::delete('reconciliations/{reconciliation}', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'destroy'])->name('reconciliations.destroy');
         Route::post('reconciliations/{reconciliation}/items', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'updateItems'])->name('reconciliations.update-items');
         Route::post('reconciliations/{reconciliation}/finalize', [\App\Http\Controllers\Finance\BankReconciliationController::class, 'finalize'])->name('reconciliations.finalize');
         

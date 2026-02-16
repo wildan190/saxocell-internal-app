@@ -20,4 +20,9 @@ class Store extends Model
     {
         return $this->hasMany(StoreInventory::class);
     }
+
+    public function accounts(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Account::class, 'owner');
+    }
 }

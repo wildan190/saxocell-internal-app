@@ -46,7 +46,7 @@ class StoreController extends Controller
      */
     public function show(Store $store)
     {
-        $store->load(['inventory.product']);
+        $store->load(['inventory.product', 'accounts']);
         
         $stats = [
             'total_skus' => $store->inventory->count(),

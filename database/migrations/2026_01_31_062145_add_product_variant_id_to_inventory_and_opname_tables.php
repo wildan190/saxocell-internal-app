@@ -39,6 +39,24 @@ return new class extends Migration
     {
         Schema::table('warehouse_inventories', function (Blueprint $table) {
             $table->dropUnique('warehouse_product_variant_unique');
+        });
+
+        // Remove duplicates before re-adding unique constraint
+        if (Schema::hasTable('warehouse_inventories')) {
+             \Illuminate\Support\Facades\DB::statement("
+                DELETE FROM warehouse_inventories 
+                WHERE id IN (
+                    SELECT id FROM (
+                        SELECT id, 
+                        ROW_NUMBER() OVER (partition BY warehouse_id, product_id ORDER BY id) as rnum 
+                        FROM warehouse_inventories
+                    ) t 
+                    WHERE t.rnum > 1
+                )
+            ");
+        }
+
+        Schema::table('warehouse_inventories', function (Blueprint $table) {
             $table->unique(['warehouse_id', 'product_id']);
             $table->dropForeign(['product_variant_id']);
             $table->dropColumn('product_variant_id');
@@ -46,6 +64,23 @@ return new class extends Migration
 
         Schema::table('store_inventories', function (Blueprint $table) {
             $table->dropUnique('store_product_variant_unique');
+        });
+
+        if (Schema::hasTable('store_inventories')) {
+             \Illuminate\Support\Facades\DB::statement("
+                DELETE FROM store_inventories 
+                WHERE id IN (
+                    SELECT id FROM (
+                        SELECT id, 
+                        ROW_NUMBER() OVER (partition BY store_id, product_id ORDER BY id) as rnum 
+                        FROM store_inventories
+                    ) t 
+                    WHERE t.rnum > 1
+                )
+            ");
+        }
+
+        Schema::table('store_inventories', function (Blueprint $table) {
             $table->unique(['store_id', 'product_id']);
             $table->dropForeign(['product_variant_id']);
             $table->dropColumn('product_variant_id');

@@ -31,10 +31,24 @@
                 <span class="price-amount">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
             </div>
 
-            @if($product->description)
+            @if($product->description_1)
             <div class="product-description">
-                <h3>Description</h3>
-                <p>{{ $product->description }}</p>
+                <h3>Description 1</h3>
+                <p>{{ $product->description_1 }}</p>
+            </div>
+            @endif
+
+            @if($product->description_2)
+            <div class="product-description">
+                <h3>Description 2</h3>
+                <p>{{ $product->description_2 }}</p>
+            </div>
+            @endif
+
+            @if($product->description_3)
+            <div class="product-description">
+                <h3>Description 3</h3>
+                <p>{{ $product->description_3 }}</p>
             </div>
             @endif
 

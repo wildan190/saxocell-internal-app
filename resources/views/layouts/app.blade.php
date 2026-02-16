@@ -20,13 +20,48 @@
     <div class="overlay" id="overlay"></div>
 
     <!-- Sidebar -->
+@php
+        // Determine active module based on route
+        $activeModule = 'launcher';
+        
+        if (request()->routeIs('stores.*')) {
+            $activeModule = 'store';
+        } elseif (request()->routeIs('products.*') || request()->routeIs('suppliers.*') || request()->routeIs('inventory.*') || request()->routeIs('warehouses.*') || request()->routeIs('stock-transfers.*') || request()->routeIs('stock-opnames.*')) {
+            $activeModule = 'inventory';
+        } elseif (request()->routeIs('purchase-orders.*') || request()->routeIs('delivery-orders.*') || request()->routeIs('invoices.*')) {
+            $activeModule = 'procurement';
+        } elseif (request()->routeIs('finance.*')) {
+            $activeModule = 'finance';
+        } elseif (request()->routeIs('hrm.ess.*')) {
+            $activeModule = 'ess';
+        } elseif (request()->routeIs('hrm.*')) {
+            $activeModule = 'hrm';
+        }
+    @endphp
+
+    @if($activeModule !== 'launcher')
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div style="display: flex; align-items: center;">
                 <div class="sidebar-logo">
-                    <i data-feather="grid"></i>
+                    @if($activeModule == 'inventory') <i data-feather="box"></i>
+                    @elseif($activeModule == 'procurement') <i data-feather="shopping-cart"></i>
+                    @elseif($activeModule == 'finance') <i data-feather="pie-chart"></i>
+                    @elseif($activeModule == 'hrm') <i data-feather="users"></i>
+                    @elseif($activeModule == 'ess') <i data-feather="smile"></i>
+                    @else <i data-feather="grid"></i>
+                    @endif
                 </div>
-                <span class="sidebar-brand">{{ config('app.name', 'Laravel') }}</span>
+                <span class="sidebar-brand">
+                    @if($activeModule == 'inventory') Inventory
+                    @elseif($activeModule == 'procurement') Procurement
+                    @elseif($activeModule == 'finance') Finance
+                    @elseif($activeModule == 'hrm') HRM System
+                    @elseif($activeModule == 'ess') My Portal
+                    @else Saxocell
+                    @endif
+                </span>
             </div>
             <button class="sidebar-toggle" id="sidebarToggle">
                 <i data-feather="x"></i>
@@ -34,24 +69,27 @@
         </div>
 
         <nav class="sidebar-nav">
-            <div class="nav-section">
+            <!-- Home / Apps Link -->
+            <div class="nav-item mb-4">
+                <a href="{{ route('home') }}" data-no-ajax="true" class="nav-link bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700">
+                    <i data-feather="grid" class="nav-icon"></i>
+                    Apps Launcher
+                </a>
+            </div>
                 <div class="nav-section-title">Main</div>
                 <div class="nav-item">
-                    <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                    <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <i data-feather="home" class="nav-icon"></i>
                         Dashboard
                     </a>
                 </div>
+
+            @if($activeModule == 'inventory')
+                <div class="nav-section-title">Operations</div>
                 <div class="nav-item">
                     <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
                         <i data-feather="package" class="nav-icon"></i>
                         Products
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('suppliers.index') }}" class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
-                        <i data-feather="users" class="nav-icon"></i>
-                        Suppliers
                     </a>
                 </div>
                 <div class="nav-item">
@@ -60,48 +98,24 @@
                         Inventory
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a href="{{ route('suppliers.index') }}" class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+                        <i data-feather="users" class="nav-icon"></i>
+                        Suppliers
+                    </a>
+                </div>
                 
-                <div class="nav-section-title">Procurement</div>
-                <div class="nav-item">
-                    <a href="{{ route('purchase-orders.index') }}" class="nav-link {{ request()->routeIs('purchase-orders.*') ? 'active' : '' }}">
-                        <i data-feather="shopping-bag" class="nav-icon"></i>
-                        Purchase Orders
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('delivery-orders.index') }}" class="nav-link {{ request()->routeIs('delivery-orders.*') ? 'active' : '' }}">
-                        <i data-feather="package" class="nav-icon"></i>
-                        Delivery Orders
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('invoices.index') }}" class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}">
-                        <i data-feather="file-text" class="nav-icon"></i>
-                        Invoices
-                    </a>
-                </div>
-
-                <div class="nav-section-title">Warehouse Management</div>
+                <div class="nav-section-title">Warehousing</div>
                 <div class="nav-item">
                     <a href="{{ route('warehouses.index') }}" class="nav-link {{ request()->routeIs('warehouses.*') ? 'active' : '' }}">
                         <i data-feather="archive" class="nav-icon"></i>
                         Warehouses
                     </a>
                 </div>
+                
+                <div class="nav-section-title">Logistics</div>
                 <div class="nav-item">
-                    <a href="{{ route('stores.index') }}" class="nav-link {{ request()->routeIs('stores.*') ? 'active' : '' }}">
-                        <i data-feather="shopping-cart" class="nav-icon"></i>
-                        Stores
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('stock-transfers.create-request') }}" class="nav-link {{ request()->routeIs('stock-transfers.create-request') ? 'active' : '' }}">
-                        <i data-feather="download" class="nav-icon"></i>
-                        Request Stock
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('stock-transfers.index') }}" class="nav-link {{ (request()->routeIs('stock-transfers.*') && !request()->routeIs('stock-transfers.create-request')) ? 'active' : '' }}">
+                    <a href="{{ route('stock-transfers.index') }}" class="nav-link {{ request()->routeIs('stock-transfers.*') ? 'active' : '' }}">
                         <i data-feather="truck" class="nav-icon"></i>
                         Stock Transfers
                     </a>
@@ -112,17 +126,43 @@
                         Stock Opname
                     </a>
                 </div>
-                <div class="nav-section-title">Finance & Accounting</div>
+
+            @elseif($activeModule == 'store')
+                <div class="nav-section-title">Store Operations</div>
                 <div class="nav-item">
-                    <a href="{{ route('finance.index') }}" class="nav-link {{ request()->routeIs('finance.index') ? 'active' : '' }}">
-                        <i data-feather="monitor" class="nav-icon"></i>
-                        Finance Dashboard
+                    <a href="{{ route('stores.index') }}" class="nav-link {{ request()->routeIs('stores.*') ? 'active' : '' }}">
+                        <i data-feather="shopping-bag" class="nav-icon"></i>
+                        All Stores
+                    </a>
+                </div>
+
+            @elseif($activeModule == 'procurement')
+                <div class="nav-section-title">Purchasing</div>
+                <div class="nav-item">
+                    <a href="{{ route('purchase-orders.index') }}" class="nav-link {{ request()->routeIs('purchase-orders.*') ? 'active' : '' }}">
+                        <i data-feather="shopping-bag" class="nav-icon"></i>
+                        Purchase Orders
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="{{ route('finance.accounts.index') }}" class="nav-link {{ request()->routeIs('finance.accounts.*') ? 'active' : '' }}">
-                        <i data-feather="list" class="nav-icon"></i>
-                        Chart of Accounts
+                    <a href="{{ route('delivery-orders.index') }}" class="nav-link {{ request()->routeIs('delivery-orders.*') ? 'active' : '' }}">
+                        <i data-feather="package" class="nav-icon"></i>
+                        Delivery Orders (GR)
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="{{ route('invoices.index') }}" class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}">
+                        <i data-feather="file-text" class="nav-icon"></i>
+                        Vendor Invoices
+                    </a>
+                </div>
+
+            @elseif($activeModule == 'finance')
+                <div class="nav-section-title">Accounting</div>
+                <div class="nav-item">
+                    <a href="{{ route('finance.index') }}" class="nav-link {{ request()->routeIs('finance.index') ? 'active' : '' }}">
+                        <i data-feather="monitor" class="nav-icon"></i>
+                        Dashboard
                     </a>
                 </div>
                 <div class="nav-item">
@@ -131,6 +171,14 @@
                         General Ledger
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a href="{{ route('finance.accounts.index') }}" class="nav-link {{ request()->routeIs('finance.accounts.*') ? 'active' : '' }}">
+                        <i data-feather="list" class="nav-icon"></i>
+                        Chart of Accounts
+                    </a>
+                </div>
+                
+                <div class="nav-section-title">Payables & Cash</div>
                 <div class="nav-item">
                     <a href="{{ route('finance.payables') }}" class="nav-link {{ request()->routeIs('finance.payables') ? 'active' : '' }}">
                         <i data-feather="external-link" class="nav-icon"></i>
@@ -143,20 +191,31 @@
                         Bank Reconciliation
                     </a>
                 </div>
+                
+                <div class="nav-section-title">Reporting</div>
                 <div class="nav-item">
                     <a href="{{ route('finance.reports') }}" class="nav-link {{ request()->routeIs('finance.reports.*') ? 'active' : '' }}">
                         <i data-feather="pie-chart" class="nav-icon"></i>
-                        Reports
+                        Financial Reports
                     </a>
                 </div>
 
-                <div class="nav-section-title">HR & Personnel</div>
+            @elseif($activeModule == 'hrm')
+                <div class="nav-section-title">Personnel</div>
                 <div class="nav-item">
                     <a href="{{ route('hrm.employees.index') }}" class="nav-link {{ request()->routeIs('hrm.employees.*') ? 'active' : '' }}">
                         <i data-feather="users" class="nav-icon"></i>
                         Employees
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a href="{{ route('hrm.departments.index') }}" class="nav-link {{ request()->routeIs('hrm.departments.*') ? 'active' : '' }}">
+                        <i data-feather="briefcase" class="nav-icon"></i>
+                        Departments
+                    </a>
+                </div>
+                
+                <div class="nav-section-title">Time & Attendance</div>
                 <div class="nav-item">
                     <a href="{{ route('hrm.attendance.index') }}" class="nav-link {{ request()->routeIs('hrm.attendance.*') ? 'active' : '' }}">
                         <i data-feather="clock" class="nav-icon"></i>
@@ -169,12 +228,16 @@
                         Overtime
                     </a>
                 </div>
+
+                <div class="nav-section-title">Compensation</div>
                 <div class="nav-item">
                     <a href="{{ route('hrm.payroll.index') }}" class="nav-link {{ request()->routeIs('hrm.payroll.*') || request()->routeIs('hrm.salary-components.*') ? 'active' : '' }}">
                         <i data-feather="dollar-sign" class="nav-icon"></i>
                         Payroll
                     </a>
                 </div>
+                
+                <div class="nav-section-title">Talent</div>
                 <div class="nav-item">
                     <a href="{{ route('hrm.recruitment.index') }}" class="nav-link {{ request()->routeIs('hrm.recruitment.*') || request()->routeIs('hrm.applicants.*') || request()->routeIs('hrm.jobs.*') ? 'active' : '' }}">
                         <i data-feather="user-plus" class="nav-icon"></i>
@@ -184,11 +247,12 @@
                 <div class="nav-item">
                     <a href="{{ route('hrm.kpi.index') }}" class="nav-link {{ request()->routeIs('hrm.kpi.*') ? 'active' : '' }}">
                         <i data-feather="trending-up" class="nav-icon"></i>
-                        KPI Evaluation
+                        Performance/KPI
                     </a>
                 </div>
 
-                <div class="nav-section-title">My Portal (ESS)</div>
+            @elseif($activeModule == 'ess')
+                <div class="nav-section-title">My Portal</div>
                 <div class="nav-item">
                     <a href="{{ route('hrm.ess.index') }}" class="nav-link {{ request()->routeIs('hrm.ess.index') ? 'active' : '' }}">
                         <i data-feather="home" class="nav-icon"></i>
@@ -213,25 +277,21 @@
                         My Profile
                     </a>
                 </div>
-            </div>
+            @endif
         </nav>
     </aside>
+    @endif
 
     <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-        <header class="topbar">
-            <button class="menu-toggle" id="menuToggle">
+    <div class="main-content {{ $activeModule === 'launcher' ? 'expanded' : '' }}" id="mainContent">
+        <header class="topbar" style="{{ $activeModule === 'launcher' ? 'display:none;' : '' }}">
+            <button class="menu-toggle" id="menuToggle" style="{{ $activeModule === 'launcher' ? 'display:none;' : '' }}">
                 <i data-feather="menu"></i>
             </button>
             <button class="sidebar-open-toggle" id="sidebarOpenToggle" style="display: none;">
                 <i data-feather="sidebar"></i>
             </button>
-            <h1 class="topbar-title">@yield('page-title', 'Dashboard')</h1>
-            <div class="user-menu">
-                <div class="user-avatar" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);">
-                    <i data-feather="user" class="w-5 h-5 text-white/80"></i>
-                </div>
-            </div>
+            <h1 class="topbar-title">@yield('page-title', ($activeModule === 'launcher' ? '' : 'Dashboard'))</h1>
         </header>
 
         @yield('breadcrumb')
@@ -273,7 +333,7 @@
             let isInitialized = false;
 
             function toggleSidebar() {
-                if (!isInitialized) return;
+                if (!isInitialized || !sidebar) return;
 
                 const isCollapsed = sidebar.classList.contains('collapsed');
 
@@ -301,7 +361,7 @@
             }
 
             function openSidebar() {
-                if (!isInitialized) return;
+                if (!isInitialized || !sidebar) return;
 
                 sidebar.classList.remove('collapsed');
                 overlay.classList.remove('active');
@@ -314,7 +374,7 @@
 
             // Add event listeners
             menuToggle.addEventListener('click', toggleSidebar);
-            sidebarToggle.addEventListener('click', toggleSidebar);
+            if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
             sidebarOpenToggle.addEventListener('click', openSidebar);
             overlay.addEventListener('click', toggleSidebar);
 
@@ -323,6 +383,8 @@
             function handleResize() {
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
+                    if (!sidebar) return; // Exit if sidebar doesn't exist
+                    
                     if (window.innerWidth <= 1024) {
                         sidebar.classList.add('collapsed');
                         overlay.classList.add('active');
@@ -346,12 +408,14 @@
 
             // Sidebar Scroll Preservation
             const sidebarScrollKey = 'sidebar_scroll_pos';
-            sidebar.addEventListener('scroll', () => {
-                localStorage.setItem(sidebarScrollKey, sidebar.scrollTop);
-            });
-            const savedScroll = localStorage.getItem(sidebarScrollKey);
-            if (savedScroll) {
-                sidebar.scrollTop = savedScroll;
+            if (sidebar) {
+                sidebar.addEventListener('scroll', () => {
+                    localStorage.setItem(sidebarScrollKey, sidebar.scrollTop);
+                });
+                const savedScroll = localStorage.getItem(sidebarScrollKey);
+                if (savedScroll) {
+                    sidebar.scrollTop = savedScroll;
+                }
             }
 
             // AJAX Navigation System
@@ -551,6 +615,7 @@
 
     </script>
 
+    <!-- Scripts stack moved inside ajaxContent for SPA behavior -->
     <!-- Scripts stack moved inside ajaxContent for SPA behavior -->
 </body>
 </html>
