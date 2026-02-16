@@ -55,7 +55,11 @@ class StoreController extends Controller
             'out_of_stock' => $store->inventory->where('quantity', '<=', 0)->count(),
         ];
 
-        return view('stores.show', compact('store', 'stats'));
+        $pendingOrdersCount = $store->orders()
+            ->whereIn('status', ['pending_payment', 'pending_confirmation'])
+            ->count();
+
+        return view('stores.show', compact('store', 'stats', 'pendingOrdersCount'));
     }
 
     /**

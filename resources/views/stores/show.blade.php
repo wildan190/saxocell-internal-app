@@ -91,6 +91,18 @@
                 </div>
             </div>
         </div>
+
+        <div class="bg-white p-6 rounded-[2rem] border border-slate-200/60 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-purple-50 text-purple-500 rounded-2xl">
+                    <i data-feather="shopping-cart" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Pending Orders</span>
+                    <span class="block text-2xl font-black text-purple-600">{{ number_format($pendingOrdersCount) }}</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -258,6 +270,20 @@
                         <div class="flex items-center gap-3">
                             <i data-feather="corner-up-right" class="w-4 h-4 text-blue-400"></i>
                             <span class="font-bold text-sm">Request Stock</span>
+                        </div>
+                        <i data-feather="chevron-right" class="w-4 h-4 text-white/30 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="{{ route('stores.orders.index', $store->id) }}" class="flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all group">
+                        <div class="flex items-center gap-3">
+                            <i data-feather="shopping-cart" class="w-4 h-4 text-purple-400"></i>
+                            <span class="font-bold text-sm">Online Orders</span>
+                        </div>
+                        <i data-feather="chevron-right" class="w-4 h-4 text-white/30 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="{{ route('marketplace.index', $store->slug) }}" target="_blank" class="flex items-center justify-between p-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all group">
+                        <div class="flex items-center gap-3">
+                            <i data-feather="external-link" class="w-4 h-4 text-emerald-400"></i>
+                            <span class="font-bold text-sm">Visit Shop</span>
                         </div>
                         <i data-feather="chevron-right" class="w-4 h-4 text-white/30 group-hover:translate-x-1 transition-transform"></i>
                     </a>

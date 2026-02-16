@@ -213,3 +213,25 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
+
+// Store Order Management Routes (Admin)
+Route::middleware(['auth'])->prefix('stores/{store}/orders')->name('stores.orders.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\StoreOrderController::class, 'index'])->name('index');
+    Route::get('/{order}', [\App\Http\Controllers\StoreOrderController::class, 'show'])->name('show');
+    Route::post('/{order}/confirm', [\App\Http\Controllers\StoreOrderController::class, 'confirm'])->name('confirm');
+    Route::post('/{order}/reject', [\App\Http\Controllers\StoreOrderController::class, 'reject'])->name('reject');
+});
+
+// Marketplace Public Routes
+Route::prefix('shop/{slug}')->name('marketplace.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\MarketplaceController::class, 'index'])->name('index');
+    Route::get('/cart', [\App\Http\Controllers\MarketplaceController::class, 'viewCart'])->name('cart');
+    Route::get('/checkout', [\App\Http\Controllers\MarketplaceController::class, 'checkout'])->name('checkout');
+    Route::post('/order', [\App\Http\Controllers\MarketplaceController::class, 'storeOrder'])->name('order.store');
+    Route::get('/order/{order}/payment', [\App\Http\Controllers\MarketplaceController::class, 'payment'])->name('payment');
+    Route::post('/order/{order}/payment', [\App\Http\Controllers\MarketplaceController::class, 'uploadPayment'])->name('payment.upload');
+    Route::post('/cart/add/{product}', [\App\Http\Controllers\MarketplaceController::class, 'addToCart'])->name('cart.add');
+    Route::delete('/cart/remove/{id}', [\App\Http\Controllers\MarketplaceController::class, 'removeFromCart'])->name('cart.remove');
+    Route::get('/product/{product}', [\App\Http\Controllers\MarketplaceController::class, 'show'])->name('product.show');
+});
+
