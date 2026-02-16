@@ -10,7 +10,9 @@ class Product extends Model
 {
     protected $fillable = [
         'name',
-        'description',
+        'description_1',
+        'description_2',
+        'description_3',
         'price',
         'cost_price',
         'category',
@@ -21,6 +23,22 @@ class Product extends Model
         'image',
         'needs_price_review',
     ];
+
+    /**
+     * Get the description attribute (alias for description_1 for backward compatibility).
+     */
+    public function getDescriptionAttribute()
+    {
+        return $this->description_1;
+    }
+
+    /**
+     * Set the description attribute (alias for description_1 for backward compatibility).
+     */
+    public function setDescriptionAttribute($value)
+    {
+        $this->description_1 = $value;
+    }
 
     protected $casts = [
         'product_specs' => 'array',

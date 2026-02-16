@@ -47,10 +47,28 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <textarea name="description" class="form-control @error('description') is-invalid @enderror" 
-                              rows="4">{{ old('description') }}</textarea>
-                    @error('description')
+                    <label class="form-label">Description 1</label>
+                    <textarea name="description_1" class="form-control @error('description_1') is-invalid @enderror" 
+                              rows="3">{{ old('description_1') }}</textarea>
+                    @error('description_1')
+                        <p class="error-message">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description 2</label>
+                    <textarea name="description_2" class="form-control @error('description_2') is-invalid @enderror" 
+                              rows="3">{{ old('description_2') }}</textarea>
+                    @error('description_2')
+                        <p class="error-message">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description 3</label>
+                    <textarea name="description_3" class="form-control @error('description_3') is-invalid @enderror" 
+                              rows="3">{{ old('description_3') }}</textarea>
+                    @error('description_3')
                         <p class="error-message">{{ $message }}</p>
                     @enderror
                 </div>

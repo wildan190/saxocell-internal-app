@@ -30,9 +30,21 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Remove rows with null product_id before reverting schema
+        if (Schema::hasTable('purchase_order_items')) {
+            \Illuminate\Support\Facades\DB::table('purchase_order_items')
+                ->whereNull('product_id')
+                ->delete();
+        }
+
         Schema::table('purchase_order_items', function (Blueprint $table) {
             // Drop the new custom columns
-            $table->dropColumn(['item_name', 'description']);
+            if (Schema::hasColumn('purchase_order_items', 'item_name')) {
+                $table->dropColumn('item_name');
+            }
+            if (Schema::hasColumn('purchase_order_items', 'description')) {
+                $table->dropColumn('description');
+            }
             
             // Revert product_id to not nullable
             // Note: This might fail if there are NULLs.

@@ -13,8 +13,15 @@ class Account extends Model
         'type',
         'category',
         'is_active',
+        'owner_type',
+        'owner_id',
         'current_balance',
     ];
+
+    public function owner()
+    {
+        return $this->morphTo();
+    }
 
     protected $casts = [
         'is_active' => 'boolean',

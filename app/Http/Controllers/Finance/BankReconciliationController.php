@@ -123,4 +123,46 @@ class BankReconciliationController extends Controller
         return redirect()->route('finance.reconciliations.index')
             ->with('success', 'Reconciliation finalized successfully.');
     }
+    public function edit(BankReconciliation $reconciliation)
+    {
+        if ($reconciliation->status !== 'draft') {
+            return redirect()->route('finance.reconciliations.show', $reconciliation)
+                ->with('error', 'Cannot edit a finalized reconciliation.');
+        }
+        
+        return view('finance.reconciliations.edit', compact('reconciliation'));
+    }
+
+    public function update(Request $request, BankReconciliation $reconciliation)
+    {
+        if ($reconciliation->status !== 'draft') {
+            return back()->with('error', 'Cannot update a finalized reconciliation.');
+        }
+
+        $validated = $request->validate([
+            'statement_date' => 'required|date',
+            'closing_balance' => 'required|numeric',
+        ]);
+
+        $reconciliation->update($validated);
+
+        return redirect()->route('finance.reconciliations.show', $reconciliation)
+            ->with('success', 'Reconciliation details updated.');
+    }
+
+    public function destroy(BankReconciliation $reconciliation)
+    {
+        if ($reconciliation->status !== 'draft') {
+            return back()->with('error', 'Cannot delete a finalized reconciliation.');
+        }
+
+        // Unlink any items
+        JournalItem::where('bank_reconciliation_id', $reconciliation->id)
+            ->update(['bank_reconciliation_id' => null, 'reconciled_at' => null]);
+
+        $reconciliation->delete();
+
+        return redirect()->route('finance.reconciliations.index')
+            ->with('success', 'Reconciliation deleted.');
+    }
 }

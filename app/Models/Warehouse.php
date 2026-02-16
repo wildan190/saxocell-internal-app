@@ -20,4 +20,9 @@ class Warehouse extends Model
     {
         return $this->hasMany(WarehouseInventory::class);
     }
+
+    public function accounts(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Account::class, 'owner');
+    }
 }

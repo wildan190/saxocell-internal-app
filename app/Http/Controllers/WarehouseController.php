@@ -46,7 +46,7 @@ class WarehouseController extends Controller
      */
     public function show(Warehouse $warehouse)
     {
-        $warehouse->load(['inventory.product']);
+        $warehouse->load(['inventory.product', 'accounts']);
         
         $stats = [
             'total_skus' => $warehouse->inventory->count(),

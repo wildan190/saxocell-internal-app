@@ -95,7 +95,47 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
         <!-- Main Inventory Content -->
-        <div class="lg:col-span-8">
+        <div class="lg:col-span-8 space-y-8">
+            <!-- Financial Wallet -->
+            <div class="bg-slate-900 rounded-[2.5rem] shadow-xl overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                
+                <div class="p-8">
+                    <div class="flex items-center justify-between mb-6 relative z-10">
+                        <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3">
+                            <span class="w-8 h-8 bg-white/10 text-blue-400 rounded-lg flex items-center justify-center">
+                                <i data-feather="briefcase" class="w-4 h-4"></i>
+                            </span>
+                            Warehouse Wallet
+                        </h3>
+                         <div class="flex gap-2">
+                             <a href="{{ route('warehouses.income.create', $warehouse) }}" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-emerald-900/20 flex items-center gap-2">
+                                <i data-feather="plus" class="w-3 h-3"></i> Income
+                            </a>
+                            <a href="{{ route('warehouses.transfer.create', $warehouse) }}" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+                                <i data-feather="arrow-right" class="w-3 h-3"></i> Transfer
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                        @foreach($warehouse->accounts as $account)
+                        <div class="bg-white/5 border border-white/10 p-5 rounded-2xl">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{{ $account->name }}</p>
+                            <p class="text-2xl font-black text-white">RP {{ number_format($account->current_balance, 0, ',', '.') }}</p>
+                            <p class="text-[10px] text-slate-500 font-mono mt-2">{{ $account->code }}</p>
+                        </div>
+                        @endforeach
+                         @if($warehouse->accounts->isEmpty())
+                        <div class="col-span-2 text-center py-4 text-slate-500 text-sm italic">
+                            No accounts linked to this warehouse.
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Assets -->
             <div class="bg-white rounded-[2.5rem] border border-slate-200/60 shadow-xl overflow-hidden">
                 <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
                     <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
