@@ -11,6 +11,19 @@
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
             Select a module to get started. Each module is a dedicated workspace for specific tasks.
         </p>
+        <div class="mt-6 flex items-center justify-center gap-4">
+            <span class="text-sm text-slate-500 font-medium">
+                <i data-feather="user" class="w-4 h-4 inline-block mr-1"></i>
+                {{ auth()->user()->name ?? auth()->user()->email }}
+            </span>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl text-sm font-bold transition-all border border-slate-200 hover:border-rose-200">
+                    <i data-feather="log-out" class="w-4 h-4"></i>
+                    Logout
+                </button>
+            </form>
+        </div>
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-5xl w-full">
