@@ -93,7 +93,7 @@ class WarehouseFinanceController extends Controller
             'description' => 'nullable|string',
             'source_account_id' => 'required|exists:accounts,id',
             'destination_type' => 'required|in:store,warehouse',
-            'destination_id' => 'required|integer', 
+            'destination_id' => 'required', 
             'destination_account_id' => 'required|exists:accounts,id',
             'amount' => 'required|numeric|min:0.01',
         ]);
