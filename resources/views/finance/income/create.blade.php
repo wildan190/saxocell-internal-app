@@ -7,7 +7,6 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
-        <div>
             @if(request('prefill_type') == 'store' && request('prefill_id'))
                 <a href="{{ route('stores.show', request('prefill_id')) }}" class="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors mb-2 text-xs font-bold uppercase tracking-wider">
                     <i data-feather="arrow-left" class="w-4 h-4"></i> Back to Store
@@ -103,10 +102,10 @@
 </div>
 
 <template id="itemTemplate">
-    <div class="item-row grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 relative group animate-fade-in">
+    <div class="item-row grid grid-cols-1 md:grid-cols-12 gap-5 p-6 bg-slate-50/50 rounded-3xl border border-slate-100 relative group animate-fade-in hover:bg-white hover:shadow-xl hover:border-blue-100 transition-all duration-300">
         <div class="md:col-span-4">
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Entity (Store/Warehouse)</label>
-            <select class="entity-select w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 focus:outline-none focus:border-blue-500 transition-colors">
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Entity / Source</label>
+            <select class="entity-select w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all">
                 <option value="">Select Entity...</option>
                 <optgroup label="General Finance">
                     <option value="general-null" data-type="general" data-id="null">General Accounts / Office</option>
@@ -124,17 +123,20 @@
             </select>
         </div>
         <div class="md:col-span-4">
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Deposit Account (Cash/Bank)</label>
-            <select name="items[INDEX][deposit_account_id]" class="deposit-account-select w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50" disabled>
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Deposit To</label>
+            <select name="items[INDEX][deposit_account_id]" class="deposit-account-select w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all disabled:opacity-50" disabled>
                 <option value="">Select Entity First...</option>
             </select>
         </div>
         <div class="md:col-span-3">
-            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Amount</label>
-            <input type="number" name="items[INDEX][amount]" step="0.01" min="0" class="amount-input w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-900 focus:outline-none focus:border-blue-500 transition-colors" placeholder="0.00">
+            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Amount</label>
+            <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">RP</span>
+                <input type="number" name="items[INDEX][amount]" step="0.01" min="0" class="amount-input w-full bg-white border-2 border-slate-100 rounded-xl pl-10 pr-4 py-3 text-sm font-black text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all" placeholder="0.00">
+            </div>
         </div>
         <div class="md:col-span-1 flex items-end justify-center pb-2">
-            <button type="button" class="remove-item-btn text-slate-400 hover:text-rose-500 transition-colors p-2">
+            <button type="button" class="remove-item-btn w-10 h-10 flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
                 <i data-feather="trash-2" class="w-4 h-4"></i>
             </button>
         </div>
@@ -186,8 +188,7 @@
         }
     }
 
-    // Add first item by default
-    addItem();
+    // Initial setup handled at bottom
     initPrefill();
 
     function getEntityAccounts(type, id) {
