@@ -2,107 +2,180 @@
 
 @section('title', 'Balance Sheet')
 
+@section('breadcrumb')
+<nav class="breadcrumb">
+    <div class="breadcrumb-item">
+        <i data-feather="home"></i>
+        <a href="{{ route('home') }}">Home</a>
+    </div>
+    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
+    <div class="breadcrumb-item">
+        <a href="{{ route('finance.index') }}">Finance</a>
+    </div>
+    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
+    <div class="breadcrumb-item">
+        <a href="{{ route('finance.reports') }}">Reports</a>
+    </div>
+    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
+    <div class="breadcrumb-item active">Balance Sheet</div>
+</nav>
+@endsection
+
 @section('content')
-<div class="content-wrapper bg-slate-50/50 min-h-screen pb-20 p-12">
-    <!-- Header -->
-    <div class="max-w-6xl mx-auto">
-        <div class="bg-white rounded-[4rem] shadow-2xl p-16 border border-slate-100 relative overflow-hidden">
-            <!-- Glass Decorative Element -->
-            <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
-            
-            <div class="flex justify-between items-center mb-20 relative">
-                <div>
-                    <h1 class="text-7xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Financial Result</h1>
-                    <p class="text-slate-400 font-bold text-xl mt-6 tracking-wider uppercase ml-2 flex items-center gap-4">
-                        <i data-feather="calendar" class="w-6 h-6 text-blue-600"></i> Balance Sheet Statement • As of {{ $date }}
+<div class="content-wrapper">
+    <!-- Report Header -->
+    <div class="card mb-6">
+        <div class="p-6 md:p-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div class="flex-1">
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Balance Sheet</h1>
+                    <p class="text-sm text-slate-500 font-medium flex items-center gap-2">
+                        <i data-feather="calendar" class="w-4 h-4"></i>
+                        As of {{ $date }}
                     </p>
                 </div>
-                <div class="text-right">
-                    <div class="flex flex-col items-end">
-                        <span class="text-xs font-bold uppercase tracking-[0.4em] text-slate-400 mb-2">Total Solvency</span>
-                        <p class="text-3xl font-bold text-slate-900">RP {{ number_format($totalAssets, 0, ',', '.') }}</p>
-                    </div>
+                <div class="bg-slate-900 text-white rounded-2xl p-6 text-center min-w-[200px]">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Total Assets</p>
+                    <p class="text-2xl md:text-3xl font-black text-white">
+                        RP {{ number_format($totalAssets, 0, ',', '.') }}
+                    </p>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="space-y-24">
-                <!-- Assets -->
-                <section>
-                    <div class="flex justify-between items-end border-b-[6px] border-slate-900 pb-6 mb-10">
-                        <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">Assets</h2>
-                        <span class="text-2xl font-black text-slate-400">Section I</span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <div class="space-y-6">
-                            @foreach($assets as $acc)
-                            <div class="flex justify-between items-center group p-6 hover:bg-slate-50 rounded-3xl transition-all">
-                                <span class="text-slate-500 font-black text-lg group-hover:text-slate-900 transition-colors">{{ $acc->name }}</span>
-                                <span class="text-slate-900 font-black text-xl">RP {{ number_format($acc->current_balance, 0, ',', '.') }}</span>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Assets Section -->
+        <div class="lg:col-span-2">
+            <div class="card">
+                <div class="border-b border-slate-100 p-6 bg-blue-50/30">
+                    <h2 class="text-lg font-bold text-slate-900">Assets</h2>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            @php
+                                $halfCount = ceil($assets->count() / 2);
+                                $firstHalf = $assets->take($halfCount);
+                                $secondHalf = $assets->slice($halfCount);
+                            @endphp
+                            
+                            @foreach($firstHalf as $acc)
+                            <div class="flex justify-between items-center py-2 hover:bg-slate-50 px-3 rounded-lg transition-colors">
+                                <span class="text-sm font-medium text-slate-600">{{ $acc->name }}</span>
+                                <span class="text-sm font-bold text-slate-900">RP {{ number_format($acc->current_balance, 0, ',', '.') }}</span>
                             </div>
                             @endforeach
                         </div>
-                        <div class="bg-slate-50 rounded-[3rem] p-12 flex flex-col justify-center text-center border-2 border-slate-100 shadow-inner">
-                            <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 mb-4">Cumulative Liquid Value</p>
-                            <p class="text-3xl font-bold text-slate-900">RP {{ number_format($totalAssets, 0, ',', '.') }}</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Liabilities & Equity -->
-                <section>
-                    <div class="flex justify-between items-end border-b-[6px] border-slate-900 pb-6 mb-10">
-                        <h2 class="text-4xl font-black text-slate-900 uppercase tracking-tighter">Liabilities & Equity</h2>
-                        <span class="text-2xl font-black text-slate-400">Section II</span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        <div class="space-y-12">
-                            <!-- Liabilities Sub-section -->
-                            <div class="space-y-4">
-                                <h3 class="text-xs font-black uppercase tracking-wider text-rose-500 mb-6 flex items-center gap-2">
-                                    <span class="w-8 h-[2px] bg-rose-200"></span> Liabilities
-                                </h3>
-                                @foreach($liabilities as $acc)
-                                <div class="flex justify-between items-center group px-6">
-                                    <span class="text-slate-500 font-black text-lg group-hover:text-slate-900 transition-colors">{{ $acc->name }}</span>
-                                    <span class="text-slate-900 font-black text-xl">RP {{ number_format($acc->current_balance, 0, ',', '.') }}</span>
-                                </div>
-                                @endforeach
+                        
+                        <div class="space-y-3">
+                            @foreach($secondHalf as $acc)
+                            <div class="flex justify-between items-center py-2 hover:bg-slate-50 px-3 rounded-lg transition-colors">
+                                <span class="text-sm font-medium text-slate-600">{{ $acc->name }}</span>
+                                <span class="text-sm font-bold text-slate-900">RP {{ number_format($acc->current_balance, 0, ',', '.') }}</span>
                             </div>
-                            <!-- Equity Sub-section -->
-                            <div class="space-y-4 pt-12 border-t-2 border-slate-100">
-                                <h3 class="text-xs font-black uppercase tracking-wider text-emerald-500 mb-6 flex items-center gap-2">
-                                    <span class="w-8 h-[2px] bg-emerald-200"></span> Shareholder's Equity
-                                </h3>
-                                @foreach($equity as $acc)
-                                <div class="flex justify-between items-center group px-6">
-                                    <span class="text-slate-500 font-black text-lg group-hover:text-slate-900 transition-colors">{{ $acc->name }}</span>
-                                    <span class="text-slate-900 font-black text-xl">RP {{ number_format($acc->current_balance, 0, ',', '.') }}</span>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                        <div class="bg-slate-900 rounded-[3rem] p-12 flex flex-col justify-center text-center text-white shadow-2xl relative overflow-hidden group">
-                            <div class="absolute -right-20 -bottom-20 w-60 h-60 bg-white/5 rounded-full blur-[60px] group-hover:bg-white/10 transition-all"></div>
-                            <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-500 mb-4">Total Liabilities & Equity</p>
-                            <p class="text-3xl font-bold text-white">RP {{ number_format($totalLiabilities + $totalEquity, 0, ',', '.') }}</p>
-                            @if(abs($totalAssets - ($totalLiabilities + $totalEquity)) < 0.01)
-                                <div class="mt-8 flex items-center justify-center gap-3 text-emerald-400 font-black text-xs uppercase tracking-wider">
-                                    <i data-feather="check-circle" class="w-4 h-4"></i> Balanced Structure
-                                </div>
-                            @else
-                                <div class="mt-8 flex items-center justify-center gap-3 text-rose-400 font-black text-xs uppercase tracking-wider">
-                                    <i data-feather="alert-triangle" class="w-4 h-4"></i> Imbalance Detected
-                                </div>
+                            @endforeach
+                            
+                            @if($assets->count() == 0)
+                            <p class="text-sm text-slate-400 text-center py-4 col-span-2">No asset accounts</p>
                             @endif
                         </div>
                     </div>
-                </section>
-            </div>
-            
-            <div class="mt-20 text-center border-t border-slate-100 pt-12">
-                <p class="text-slate-300 font-black text-[10px] uppercase tracking-[0.8em]">Saxocell Accounting Ledger • Official Business Statement</p>
+                    
+                    <div class="mt-6 pt-6 border-t border-slate-200 bg-slate-50 rounded-xl p-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-bold text-slate-600 uppercase tracking-wider">Total Assets</span>
+                            <span class="text-xl font-black text-blue-600">RP {{ number_format($totalAssets, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Liabilities Section -->
+        <div class="card">
+            <div class="border-b border-slate-100 p-6 bg-rose-50/30">
+                <h2 class="text-lg font-bold text-slate-900">Liabilities</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-3">
+                    @forelse($liabilities as $acc)
+                    <div class="flex justify-between items-center py-2 hover:bg-slate-50 px-3 rounded-lg transition-colors">
+                        <span class="text-sm font-medium text-slate-600">{{ $acc->name }}</span>
+                        <span class="text-sm font-bold text-slate-900">RP {{ number_format($acc->current_balance, 0, ',', '.') }}</span>
+                    </div>
+                    @empty
+                    <p class="text-sm text-slate-400 text-center py-4">No liability accounts</p>
+                    @endforelse
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-slate-200 bg-slate-50 rounded-xl p-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-600 uppercase tracking-wider">Total Liabilities</span>
+                        <span class="text-lg font-black text-rose-600">RP {{ number_format($totalLiabilities, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equity Section -->
+        <div class="card">
+            <div class="border-b border-slate-100 p-6 bg-emerald-50/30">
+                <h2 class="text-lg font-bold text-slate-900">Equity</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-3">
+                    @forelse($equity as $acc)
+                    <div class="flex justify-between items-center py-2 hover:bg-slate-50 px-3 rounded-lg transition-colors">
+                        <span class="text-sm font-medium text-slate-600">{{ $acc->name }}</span>
+                        <span class="text-sm font-bold text-slate-900">RP {{ number_format($acc->current_balance, 0, ',', '.') }}</span>
+                    </div>
+                    @empty
+                    <p class="text-sm text-slate-400 text-center py-4">No equity accounts</p>
+                    @endforelse
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-slate-200 bg-slate-50 rounded-xl p-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-600 uppercase tracking-wider">Total Equity</span>
+                        <span class="text-lg font-black text-emerald-600">RP {{ number_format($totalEquity, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Balance Verification -->
+    <div class="card mt-6">
+        <div class="p-6 md:p-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 {{ abs($totalAssets - ($totalLiabilities + $totalEquity)) < 0.01 ? 'bg-emerald-50' : 'bg-rose-50' }} rounded-2xl">
+                <div>
+                    <h3 class="text-xl md:text-2xl font-bold text-slate-900">Total Liabilities & Equity</h3>
+                    <p class="text-xs text-slate-500 uppercase tracking-wider mt-1">Balance Verification</p>
+                </div>
+                <div class="text-left md:text-right">
+                    <p class="text-2xl md:text-3xl font-black text-slate-900">
+                        RP {{ number_format($totalLiabilities + $totalEquity, 0, ',', '.') }}
+                    </p>
+                    @if(abs($totalAssets - ($totalLiabilities + $totalEquity)) < 0.01)
+                        <div class="flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-wider mt-2">
+                            <i data-feather="check-circle" class="w-4 h-4"></i>
+                            Balanced
+                        </div>
+                    @else
+                        <div class="flex items-center gap-2 text-rose-600 font-bold text-xs uppercase tracking-wider mt-2">
+                            <i data-feather="alert-triangle" class="w-4 h-4"></i>
+                            Imbalance Detected
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Print Footer -->
+    <div class="mt-8 text-center">
+        <p class="text-[10px] text-slate-400 uppercase tracking-widest">Saxocell Accounting Ledger • Official Statement</p>
     </div>
 </div>
 @endsection

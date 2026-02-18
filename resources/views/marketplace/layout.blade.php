@@ -7,10 +7,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://unpkg.com/feather-icons"></script>
 </head>
-<body class="bg-gray-50 text-slate-800 font-sans antialiased">
+<body class="bg-gray-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
     
     <!-- Navbar -->
-    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -36,7 +36,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="py-10">
+    <main class="flex-1 py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if(session('success'))
                 <div class="mb-8 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg relative" role="alert">
@@ -56,8 +56,16 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 py-8 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
-            &copy; {{ date('Y') }} {{ $store->name }}. All rights reserved.
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-slate-600 text-sm font-medium">
+                    &copy; {{ date('Y') }} <span class="font-bold text-slate-900">{{ $store->name }}</span>. All rights reserved.
+                </div>
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                    <i data-feather="map-pin" class="w-4 h-4"></i>
+                    <span>{{ $store->address ?: 'Online Store' }}</span>
+                </div>
+            </div>
         </div>
     </footer>
 

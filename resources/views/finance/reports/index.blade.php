@@ -2,52 +2,85 @@
 
 @section('title', 'Financial Reports')
 
+@section('breadcrumb')
+<nav class="breadcrumb">
+    <div class="breadcrumb-item">
+        <i data-feather="home"></i>
+        <a href="{{ route('home') }}">Home</a>
+    </div>
+    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
+    <div class="breadcrumb-item">
+        <a href="{{ route('finance.index') }}">Finance</a>
+    </div>
+    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
+    <div class="breadcrumb-item active">Reports</div>
+</nav>
+@endsection
+
 @section('content')
-<div class="content-wrapper bg-slate-50/50 min-h-screen pb-20 p-8 md:p-12">
-    <div class="mb-16">
-        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Intelligence Center</h1>
-        <p class="text-slate-500 mt-4 font-medium text-lg">Generate audit-ready financial statements and analysis.</p>
+<div class="content-wrapper">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Financial Reports</h1>
+            <p class="page-subtitle">Generate professional financial statements and analysis</p>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- P&L Card -->
-        <div class="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full border-b-8 border-b-emerald-400">
-            <div class="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-[2rem] flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
-                <i data-feather="file-text" class="w-10 h-10"></i>
+        <div class="card group hover:shadow-xl transition-all border-l-4 border-l-emerald-500">
+            <div class="p-6 flex flex-col h-full">
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-feather="trending-up" class="w-6 h-6"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900 mb-2">Profit & Loss</h2>
+                <p class="text-sm text-slate-500 mb-6 flex-grow">Income performance summary for the period</p>
+                <a href="{{ route('finance.reports.pl') }}" class="btn btn-primary w-full justify-center">
+                    <i data-feather="file-text" class="w-4 h-4"></i> Generate Report
+                </a>
             </div>
-            <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Profit & Loss</h2>
-            <p class="text-slate-500 font-medium mb-10 flex-grow leading-relaxed">Periodic income performance summary.</p>
-            <a href="{{ route('finance.reports.pl') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-wider hover:bg-black transition-all">Generate</a>
         </div>
 
         <!-- Balance Sheet Card -->
-        <div class="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full border-b-8 border-b-blue-400">
-            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-[2rem] flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
-                <i data-feather="briefcase" class="w-10 h-10"></i>
+        <div class="card group hover:shadow-xl transition-all border-l-4 border-l-blue-500">
+            <div class="p-6 flex flex-col h-full">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-feather="briefcase" class="w-6 h-6"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900 mb-2">Balance Sheet</h2>
+                <p class="text-sm text-slate-500 mb-6 flex-grow">Statement of financial position and equity</p>
+                <a href="{{ route('finance.reports.bs') }}" class="btn btn-primary w-full justify-center">
+                    <i data-feather="file-text" class="w-4 h-4"></i> Generate Report
+                </a>
             </div>
-            <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Balance Sheet</h2>
-            <p class="text-slate-500 font-medium mb-10 flex-grow leading-relaxed">Statement of financial position.</p>
-            <a href="{{ route('finance.reports.bs') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-wider hover:bg-black transition-all">Generate</a>
         </div>
 
         <!-- Trial Balance Card -->
-        <div class="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full border-b-8 border-b-amber-400">
-            <div class="w-20 h-20 bg-amber-50 text-amber-600 rounded-[2rem] flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
-                <i data-feather="check-square" class="w-10 h-10"></i>
+        <div class="card group hover:shadow-xl transition-all border-l-4 border-l-amber-500">
+            <div class="p-6 flex flex-col h-full">
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-feather="check-square" class="w-6 h-6"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900 mb-2">Trial Balance</h2>
+                <p class="text-sm text-slate-500 mb-6 flex-grow">Ledger arithmetic verification report</p>
+                <a href="{{ route('finance.reports.tb') }}" class="btn btn-primary w-full justify-center">
+                    <i data-feather="file-text" class="w-4 h-4"></i> Generate Report
+                </a>
             </div>
-            <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Trial Balance</h2>
-            <p class="text-slate-500 font-medium mb-10 flex-grow leading-relaxed">Verification of ledger arithmetic.</p>
-            <a href="{{ route('finance.reports.tb') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-wider hover:bg-black transition-all">Generate</a>
         </div>
 
         <!-- AP Aging Card -->
-        <div class="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-sm hover:shadow-2xl transition-all group flex flex-col h-full border-b-8 border-b-rose-400">
-            <div class="w-20 h-20 bg-rose-50 text-rose-600 rounded-[2rem] flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
-                <i data-feather="clock" class="w-10 h-10"></i>
+        <div class="card group hover:shadow-xl transition-all border-l-4 border-l-rose-500">
+            <div class="p-6 flex flex-col h-full">
+                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-feather="clock" class="w-6 h-6"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900 mb-2">Payables Aging</h2>
+                <p class="text-sm text-slate-500 mb-6 flex-grow">Outstanding debt and risk assessment</p>
+                <a href="{{ route('finance.reports.aging') }}" class="btn btn-primary w-full justify-center">
+                    <i data-feather="file-text" class="w-4 h-4"></i> Generate Report
+                </a>
             </div>
-            <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Payables Aging</h2>
-            <p class="text-slate-500 font-medium mb-10 flex-grow leading-relaxed">Outstanding debt risk assessment.</p>
-            <a href="{{ route('finance.reports.aging') }}" class="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black text-center text-xs uppercase tracking-wider hover:bg-black transition-all">Generate</a>
         </div>
     </div>
 </div>
