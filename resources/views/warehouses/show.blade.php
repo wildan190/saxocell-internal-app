@@ -101,7 +101,7 @@
                 <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                 
                 <div class="p-8">
-                    <div class="flex items-center justify-between mb-6 relative z-10">
+                     <div class="flex items-center justify-between mb-6 relative z-10">
                         <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3">
                             <span class="w-8 h-8 bg-white/10 text-blue-400 rounded-lg flex items-center justify-center">
                                 <i data-feather="briefcase" class="w-4 h-4"></i>
@@ -109,6 +109,9 @@
                             Warehouse Wallet
                         </h3>
                          <div class="flex gap-2">
+                             <button onclick="document.getElementById('add-account-modal').classList.remove('hidden')" class="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-blue-900/20 flex items-center gap-2">
+                                <i data-feather="plus-circle" class="w-3 h-3"></i> Add Account
+                            </button>
                              <a href="{{ route('warehouses.income.create', $warehouse) }}" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-emerald-900/20 flex items-center gap-2">
                                 <i data-feather="plus" class="w-3 h-3"></i> Income
                             </a>
@@ -128,9 +131,55 @@
                         @endforeach
                          @if($warehouse->accounts->isEmpty())
                         <div class="col-span-2 text-center py-4 text-slate-500 text-sm italic">
-                            No accounts linked to this warehouse.
+                            No accounts linked to this warehouse. Click "Add Account" to get started.
                         </div>
                         @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Account Modal -->
+            <div id="add-account-modal" class="hidden fixed inset-0 z-[100] overflow-y-auto">
+                <div class="flex items-center justify-center min-h-screen px-4">
+                    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm shadow-2xl transition-opacity" onclick="document.getElementById('add-account-modal').classList.add('hidden')"></div>
+                    
+                    <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl transform transition-all sm:max-w-lg sm:w-full relative z-20 border border-slate-100">
+                        <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                            <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Link New Account</h3>
+                            <button onclick="document.getElementById('add-account-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                                <i data-feather="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        
+                        <form action="{{ route('warehouses.accounts.store', $warehouse) }}" method="POST" class="p-8 space-y-5">
+                            @csrf
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Account Code</label>
+                                <input type="text" name="code" placeholder="e.g. 1101-WHS" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-blue-500 transition-colors" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Account Name</label>
+                                <input type="text" name="name" placeholder="e.g. Warehouse Petty Cash" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-blue-500 transition-colors" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Account Type</label>
+                                <select name="type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-blue-500 transition-colors" required>
+                                    <option value="asset">Asset (Cash/Bank)</option>
+                                    <option value="liability">Liability</option>
+                                    <option value="equity">Equity</option>
+                                    <option value="revenue">Revenue</option>
+                                    <option value="expense">Expense</option>
+                                </select>
+                            </div>
+                            
+                            <div class="pt-4">
+                                <button type="submit" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-100">
+                                    Create & Link Account
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

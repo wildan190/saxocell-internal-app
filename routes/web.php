@@ -92,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('income', [\App\Http\Controllers\Store\StoreFinanceController::class, 'storeIncome'])->name('income.store');
         Route::get('transfer', [\App\Http\Controllers\Store\StoreFinanceController::class, 'createTransfer'])->name('transfer.create');
         Route::post('transfer', [\App\Http\Controllers\Store\StoreFinanceController::class, 'storeTransfer'])->name('transfer.store');
+        Route::post('accounts', [\App\Http\Controllers\StoreController::class, 'storeAccount'])->name('accounts.store');
     });
 
     Route::resource('stores', \App\Http\Controllers\StoreController::class);
@@ -102,6 +103,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('income', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'storeIncome'])->name('income.store');
         Route::get('transfer', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'createTransfer'])->name('transfer.create');
         Route::post('transfer', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'storeTransfer'])->name('transfer.store');
+        Route::post('accounts', [\App\Http\Controllers\WarehouseController::class, 'storeAccount'])->name('accounts.store');
     });
 
     // Stock Transfers
