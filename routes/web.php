@@ -5,7 +5,12 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InventoryController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [\App\Http\Controllers\LauncherController::class, 'index'])->name('root');
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('home');
+    }
+    return redirect()->route('login');
+})->name('root');
 
 Route::get('/home', [\App\Http\Controllers\LauncherController::class, 'index'])
     ->middleware(['auth'])
