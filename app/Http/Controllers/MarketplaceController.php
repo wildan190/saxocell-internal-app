@@ -14,17 +14,47 @@ use Illuminate\Support\Str;
 
 class MarketplaceController extends Controller
 {
-    public function index($slug)
+    public function index(Request $request, $slug)
     {
         $store = Store::where('slug', $slug)->firstOrFail();
+        
+        // Get search and filter parameters
+        $search = $request->input('search');
+        $category = $request->input('category');
+        
         // Get products available in this store
-        $products = Product::whereHas('storeInventory', function ($query) use ($store) {
-            $query->where('store_id', $store->id)->where('quantity', '>', 0);
-        })->with(['storeInventory' => function ($query) use ($store) {
-            $query->where('store_id', $store->id);
-        }])->get();
+        $query = Product::whereHas('storeInventory', function ($q) use ($store) {
+            $q->where('store_id', $store->id)
+              ->where('quantity', '>', 0)
+              ->where('is_active', true);
+        });
+        
+        // Apply search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'ILIKE', '%' . $search . '%')
+                  ->orWhere('description_1', 'ILIKE', '%' . $search . '%')
+                  ->orWhere('sku', 'ILIKE', '%' . $search . '%');
+            });
+        }
+        
+        // Apply category filter
+        if ($category) {
+            $query->where('category', $category);
+        }
+        
+        $products = $query->with(['storeInventory' => function ($q) use ($store) {
+            $q->where('store_id', $store->id);
+        }])->latest()->get();
+        
+        // Get all available categories for filter dropdown
+        $categories = Product::whereHas('storeInventory', function ($q) use ($store) {
+            $q->where('store_id', $store->id)
+              ->where('quantity', '>', 0)
+              ->where('is_active', true);
+        })->distinct()->pluck('category')->filter()->sort()->values();
 
-        return view('marketplace.index', compact('store', 'products'));
+        return view('marketplace.index', compact('store', 'products', 'categories', 'search', 'category'));
     }
 
     public function show($slug, Product $product)
