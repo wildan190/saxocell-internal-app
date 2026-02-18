@@ -3,10 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Store;
+use App\Models\Account;
 use Illuminate\Http\Request;
 
 class StoreController extends Controller
 {
+    public function storeAccount(Request $request, Store $store)
+    {
+        $validated = $request->validate([
+            'code' => 'required|unique:accounts,code',
+            'name' => 'required',
+            'type' => 'required|in:asset,liability,equity,revenue,expense',
+            'category' => 'nullable',
+        ]);
+
+        $store->accounts()->create($validated);
+
+        return back()->with('success', 'Account created and linked to store successfully.');
+    }
     /**
      * Display a listing of the resource.
      */

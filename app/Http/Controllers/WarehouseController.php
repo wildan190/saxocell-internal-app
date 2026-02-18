@@ -3,10 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Warehouse;
+use App\Models\Account;
 use Illuminate\Http\Request;
 
 class WarehouseController extends Controller
 {
+    public function storeAccount(Request $request, Warehouse $warehouse)
+    {
+        $validated = $request->validate([
+            'code' => 'required|unique:accounts,code',
+            'name' => 'required',
+            'type' => 'required|in:asset,liability,equity,revenue,expense',
+            'category' => 'nullable',
+        ]);
+
+        $warehouse->accounts()->create($validated);
+
+        return back()->with('success', 'Account created and linked to warehouse successfully.');
+    }
     /**
      * Display a listing of the resource.
      */
