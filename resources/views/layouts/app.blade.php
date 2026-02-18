@@ -489,10 +489,20 @@
 
             function updateActiveNav(url) {
                 const links = document.querySelectorAll('.nav-link');
+                const currentUrl = new URL(url, window.location.origin).pathname;
+                
                 links.forEach(link => {
-                    if (link.href === url || url.startsWith(link.href)) {
+                    const linkUrl = new URL(link.href, window.location.origin).pathname;
+                    
+                    // Priority 1: Exact match
+                    if (currentUrl === linkUrl) {
                         link.classList.add('active');
-                    } else {
+                    } 
+                    // Priority 2: Sub-route match (but not for base module indexes like /finance)
+                    else if (currentUrl.startsWith(linkUrl) && linkUrl.split('/').length > 2) {
+                        link.classList.add('active');
+                    }
+                    else {
                         link.classList.remove('active');
                     }
                 });

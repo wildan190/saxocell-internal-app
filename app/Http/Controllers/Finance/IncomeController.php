@@ -20,14 +20,19 @@ class IncomeController extends Controller
         $warehouses = Warehouse::with('accounts')->get();
         // Assuming there is a revenue account available, or user can select one.
         // For simplicity, we might just list all 'Revenue' type accounts or allow a generic one.
-        $revenueAccounts = Account::where('type', 'revenue')->orWhere('type', 'income')->get(); // Adjust based on Account types
+        $revenueAccounts = Account::where('type', 'revenue')->orWhere('type', 'income')->get();
+        // General accounts (not tied to store/warehouse)
+        $generalAccounts = Account::whereNull('owner_type')
+            ->where(function($q) {
+                $q->where('category', 'cash')->orWhere('category', 'bank');
+            })->get();
         
         $prefill = [
             'type' => $request->query('prefill_type'),
             'id' => $request->query('prefill_id'),
         ];
         
-        return view('finance.income.create', compact('stores', 'warehouses', 'revenueAccounts', 'prefill'));
+        return view('finance.income.create', compact('stores', 'warehouses', 'revenueAccounts', 'generalAccounts', 'prefill'));
     }
 
     public function store(Request $request)

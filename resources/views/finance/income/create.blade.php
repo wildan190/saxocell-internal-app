@@ -108,6 +108,9 @@
             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Entity (Store/Warehouse)</label>
             <select class="entity-select w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 focus:outline-none focus:border-blue-500 transition-colors">
                 <option value="">Select Entity...</option>
+                <optgroup label="General Finance">
+                    <option value="general-null" data-type="general" data-id="null">General Accounts / Office</option>
+                </optgroup>
                 <optgroup label="Stores">
                     @foreach($stores as $store)
                         <option value="store-{{ $store->id }}" data-type="store" data-id="{{ $store->id }}">{{ $store->name }}</option>
@@ -142,6 +145,7 @@
 <script>
     const stores = @json($stores);
     const warehouses = @json($warehouses);
+    const generalAccounts = @json($generalAccounts);
     let itemCount = 0;
     const prefill = @json($prefill ?? []);
     const itemTemplate = document.getElementById('itemTemplate');
@@ -187,6 +191,9 @@
     initPrefill();
 
     function getEntityAccounts(type, id) {
+        if (type === 'general') {
+            return generalAccounts;
+        }
         let entity = null;
         if (type === 'store') {
             entity = stores.find(s => s.id == id);
