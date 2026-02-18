@@ -13,6 +13,9 @@
         </div>
         
         <div class="flex gap-4">
+            <a href="{{ route('finance.cash') }}" class="flex items-center gap-2 px-6 py-3 bg-slate-900 border border-slate-800 text-white rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-slate-200/50">
+                <i data-feather="monitor" class="w-4 h-4"></i> Cash Desk
+            </a>
             <a href="{{ route('finance.income.create') }}" class="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-emerald-200/50">
                 <i data-feather="dollar-sign" class="w-4 h-4"></i> Record Income
             </a>

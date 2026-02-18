@@ -166,6 +166,12 @@
                     </a>
                 </div>
                 <div class="nav-item">
+                    <a href="{{ route('finance.cash') }}" class="nav-link {{ request()->routeIs('finance.cash') ? 'active' : '' }}">
+                        <i data-feather="dollar-sign" class="nav-icon"></i>
+                        Cash Management
+                    </a>
+                </div>
+                <div class="nav-item">
                     <a href="{{ route('finance.journals.index') }}" class="nav-link {{ request()->routeIs('finance.journals.*') ? 'active' : '' }}">
                         <i data-feather="book-open" class="nav-icon"></i>
                         General Ledger
