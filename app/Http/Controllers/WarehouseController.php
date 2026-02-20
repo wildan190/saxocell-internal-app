@@ -14,7 +14,7 @@ class WarehouseController extends Controller
             'code' => 'required|unique:accounts,code',
             'name' => 'required',
             'type' => 'required|in:asset,liability,equity,revenue,expense',
-            'category' => 'nullable',
+            'category' => 'required|in:cash,bank,payable,receivable,inventory,other',
         ]);
 
         $warehouse->accounts()->create($validated);

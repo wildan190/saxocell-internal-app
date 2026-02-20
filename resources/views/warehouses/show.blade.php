@@ -169,12 +169,26 @@
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Account Type</label>
                                 <select name="type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-blue-500 transition-colors" required>
-                                    <option value="asset">Asset (Cash/Bank)</option>
+                                    <option value="asset">Asset</option>
                                     <option value="liability">Liability</option>
                                     <option value="equity">Equity</option>
                                     <option value="revenue">Revenue</option>
                                     <option value="expense">Expense</option>
                                 </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Account Category</label>
+                                <select name="category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-blue-500 transition-colors" required>
+                                    <option value="">-- Select Category --</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="bank">Bank</option>
+                                    <option value="payable">Account Payable</option>
+                                    <option value="receivable">Account Receivable</option>
+                                    <option value="inventory">Inventory</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <p class="text-[10px] text-slate-400 mt-1 italic leading-tight">Gunakan "Cash" atau "Bank" agar akun ini muncul di menu 'Pay Supplier'.</p>
                             </div>
                             
                             <div class="pt-4">
