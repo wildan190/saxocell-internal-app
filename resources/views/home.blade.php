@@ -219,17 +219,28 @@
                 </div>
                 <div class="p-0">
                     <div class="divide-y divide-slate-50">
+                        @forelse($recentActivities as $activity)
                         <div class="p-4 hover:bg-slate-50 transition-colors flex gap-3">
-                            <div class="w-2 h-2 mt-2 rounded-full bg-blue-500 shrink-0"></div>
+                            <div class="w-2 h-2 mt-2 rounded-full 
+                                @if($activity->action === 'created' || $activity->action === 'clock_in') bg-emerald-500 
+                                @elseif($activity->action === 'updated') bg-blue-500 
+                                @elseif($activity->action === 'deleted' || $activity->action === 'clock_out') bg-rose-500 
+                                @else bg-slate-400 @endif shrink-0"></div>
                             <div>
-                                <p class="text-sm font-medium text-slate-800">System Activity</p>
-                                <p class="text-xs text-slate-500 mt-0.5">Monitoring inventory health...</p>
-                                <p class="text-[10px] text-slate-400 mt-1">Online</p>
+                                <p class="text-sm font-medium text-slate-800">{{ $activity->description }}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">By {{ $activity->user->name ?? 'System' }}</p>
+                                <p class="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-wider">{{ $activity->created_at->diffForHumans() }}</p>
                             </div>
                         </div>
+                        @empty
+                        <div class="p-8 text-center">
+                            <i data-feather="inbox" class="w-8 h-8 text-slate-200 mx-auto mb-2"></i>
+                            <p class="text-xs text-slate-400 italic">No recent activity detected.</p>
+                        </div>
+                        @endforelse
                     </div>
                     <div class="p-4 text-center border-t border-slate-50 bg-slate-50/50 rounded-b-2xl">
-                        <a href="#" class="text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest">View All Logs</a>
+                        <a href="{{ route('activity-logs.index') }}" class="text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest">View All Logs</a>
                     </div>
                 </div>
             </div>
