@@ -246,6 +246,10 @@
         @apply text-slate-300 flex items-center mx-1;
     }
 
+    .overlay {
+        @apply fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[950] hidden transition-all duration-300;
+    }
+
     .overlay.active {
         @apply block;
     }

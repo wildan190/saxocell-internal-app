@@ -18,26 +18,6 @@
 @endsection
 
 @section('content')
-@extends('layouts.app')
-
-@section('title', 'Create Warehouse')
-
-@section('breadcrumb')
-<nav class="breadcrumb">
-    <div class="breadcrumb-item">
-        <i data-feather="home"></i>
-        <a href="{{ route('home') }}">Home</a>
-    </div>
-    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
-    <div class="breadcrumb-item">
-        <a href="{{ route('warehouses.index') }}">Warehouses</a>
-    </div>
-    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
-    <div class="breadcrumb-item active">Create</div>
-</nav>
-@endsection
-
-@section('content')
 <div class="content-wrapper">
     <div class="page-header">
         <div>

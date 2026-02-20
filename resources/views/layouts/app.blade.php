@@ -390,7 +390,9 @@
                 if (isCollapsed) {
                     // Opening sidebar
                     sidebar.classList.remove('collapsed');
-                    overlay.classList.remove('active');
+                    if (window.innerWidth <= 1024) {
+                        overlay.classList.add('active');
+                    }
                     if (window.innerWidth > 1024) {
                         mainContent.classList.remove('expanded');
                     }
@@ -399,9 +401,7 @@
                 } else {
                     // Closing sidebar - show menu toggle for closing, hide sidebar open toggle
                     sidebar.classList.add('collapsed');
-                    if (window.innerWidth <= 1024) {
-                        overlay.classList.add('active');
-                    }
+                    overlay.classList.remove('active');
                     if (window.innerWidth > 1024) {
                         mainContent.classList.add('expanded');
                     }
@@ -437,7 +437,7 @@
                     
                     if (window.innerWidth <= 1024) {
                         sidebar.classList.add('collapsed');
-                        overlay.classList.add('active');
+                        overlay.classList.remove('active');
                         menuToggle.style.display = 'flex';
                         sidebarOpenToggle.style.display = 'none';
                     } else {
@@ -577,8 +577,12 @@
             // Intercept Form Submissions
             document.addEventListener('submit', e => {
                 const form = e.target;
-                if (form.hasAttribute('data-no-ajax') || form.target) return;
+                if (form.hasAttribute('data-no-ajax') || form.target || form.hasAttribute('data-submitting')) return;
                 
+                form.setAttribute('data-submitting', 'true');
+                const submitBtn = form.querySelector('[type="submit"]');
+                if (submitBtn) submitBtn.disabled = true;
+
                 e.preventDefault();
                 const formData = new FormData(form);
                 const url = form.action;
@@ -632,9 +636,13 @@
                     
                     pageSkeleton.classList.add('hidden');
                     ajaxContent.classList.remove('hidden');
+                    form.removeAttribute('data-submitting');
+                    if (submitBtn) submitBtn.disabled = false;
                 })
                 .catch(err => {
                     console.error('Form AJAX failed:', err);
+                    form.removeAttribute('data-submitting');
+                    if (submitBtn) submitBtn.disabled = false;
                     form.submit(); // Fallback
                 });
             });
