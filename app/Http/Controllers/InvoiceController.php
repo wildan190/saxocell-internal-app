@@ -60,6 +60,7 @@ class InvoiceController extends Controller
                 'invoice_number' => $data['invoice_number'],
                 'purchase_order_id' => $po->id,
                 'supplier_id' => $po->supplier_id,
+                'warehouse_id' => $po->warehouse_id,
                 'invoice_date' => $data['invoice_date'],
                 'due_date' => $data['due_date'] ?? null,
                 'subtotal' => $subtotal,

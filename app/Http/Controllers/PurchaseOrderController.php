@@ -6,6 +6,7 @@ use App\Http\Requests\StorePurchaseOrderRequest;
 use App\Models\PurchaseOrder;
 use App\Models\Product;
 use App\Models\Supplier;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -35,7 +36,8 @@ class PurchaseOrderController extends Controller
     {
         $suppliers = Supplier::all();
         $products = Product::with('variants')->where('status', 'active')->get();
-        return view('procurement.purchase-orders.create', compact('suppliers', 'products'));
+        $warehouses = Warehouse::all();
+        return view('procurement.purchase-orders.create', compact('suppliers', 'products', 'warehouses'));
     }
 
     public function store(StorePurchaseOrderRequest $request)
@@ -60,10 +62,11 @@ class PurchaseOrderController extends Controller
             // Create PO
             $po = PurchaseOrder::create([
                 'supplier_id' => $data['supplier_id'],
+                'warehouse_id' => $request->warehouse_id,
                 'order_date' => $data['order_date'],
                 'expected_delivery_date' => $data['expected_delivery_date'] ?? null,
                 'subtotal' => $subtotal,
-               'tax_amount' => $taxAmount,
+                'tax_amount' => $taxAmount,
                 'total_amount' => $totalAmount,
                 'notes' => $data['notes'] ?? null,
                 'created_by' => Auth::id(),
