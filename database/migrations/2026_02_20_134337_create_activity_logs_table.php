@@ -16,7 +16,9 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->string('action');
             $table->text('description')->nullable();
-            $table->nullableMorphs('subject');
+            $table->string('subject_type')->nullable();
+            $table->string('subject_id')->nullable();
+            $table->index(['subject_type', 'subject_id']);
             $table->json('properties')->nullable();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
