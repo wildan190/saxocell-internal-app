@@ -60,6 +60,11 @@ class PaymentController extends Controller
             // Debit: Accounts Payable (Liability decrease)
             // Credit: Cash/Bank (Asset decrease)
             $apAccount = Account::where('category', 'payable')->first();
+            
+            if (!$apAccount) {
+                throw new \Exception('Accounts Payable system account is not configured. Please check your Chart of Accounts.');
+            }
+
             $cashAccount = Account::find($validated['account_id']);
 
             $entry = JournalEntry::create([

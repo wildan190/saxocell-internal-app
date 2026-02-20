@@ -174,6 +174,10 @@ class InvoiceController extends Controller
             $inventoryAccount = \App\Models\Account::where('category', 'inventory')->first();
             $apAccount = \App\Models\Account::where('category', 'payable')->first();
 
+            if (!$inventoryAccount || !$apAccount) {
+                throw new \Exception('System accounts for Inventory or Accounts Payable are not configured. Please check your Chart of Accounts.');
+            }
+
             $entry = \App\Models\JournalEntry::create([
                 'entry_date' => now(),
                 'description' => "Purchase of goods via Invoice #{$invoice->invoice_number}",
