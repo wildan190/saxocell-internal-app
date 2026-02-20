@@ -39,9 +39,8 @@
         }
     @endphp
 
-    @if($activeModule !== 'launcher')
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar {{ $activeModule === 'launcher' ? 'collapsed' : '' }}" id="sidebar">
         <div class="sidebar-header">
             <div style="display: flex; align-items: center;">
                 <div class="sidebar-logo">
@@ -63,7 +62,7 @@
                     @endif
                 </span>
             </div>
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle md:hidden" id="sidebarToggle">
                 <i data-feather="x"></i>
             </button>
         </div>
@@ -297,7 +296,6 @@
             </div>
         </nav>
     </aside>
-    @endif
 
     <!-- Main Content -->
     <div class="main-content {{ $activeModule === 'launcher' ? 'expanded' : '' }}" id="mainContent">
@@ -441,11 +439,20 @@
                         menuToggle.style.display = 'flex';
                         sidebarOpenToggle.style.display = 'none';
                     } else {
-                        sidebar.classList.remove('collapsed');
-                        overlay.classList.remove('active');
-                        mainContent.classList.remove('expanded');
+                        // Desktop
+                        const isLauncher = window.location.pathname.endsWith('/home') || window.location.pathname.includes('launcher');
+                        if (isLauncher) {
+                            sidebar.classList.add('collapsed');
+                            mainContent.classList.add('expanded');
+                            if (document.querySelector('.topbar')) document.querySelector('.topbar').style.display = 'none';
+                        } else {
+                            sidebar.classList.remove('collapsed');
+                            mainContent.classList.remove('expanded');
+                            if (document.querySelector('.topbar')) document.querySelector('.topbar').style.display = 'flex';
+                        }
                         menuToggle.style.display = 'none';
                         sidebarOpenToggle.style.display = 'none';
+                        overlay.classList.remove('active');
                     }
                 }, 100);
             }
@@ -492,8 +499,40 @@
                     // Update DOM
                     ajaxContent.innerHTML = newContent.innerHTML;
                     document.title = newTitle;
-                    if (document.querySelector('.topbar-title')) {
-                        document.querySelector('.topbar-title').innerText = topbarTitle;
+                    
+                    // Sync Sidebar Content (Logo, Brand, Nav)
+                    const newSidebarLogo = doc.querySelector('.sidebar-logo');
+                    const newSidebarBrand = doc.querySelector('.sidebar-brand');
+                    const newSidebarNav = doc.querySelector('.sidebar-nav');
+                    const topbar = document.querySelector('.topbar');
+                    
+                    if (newSidebarLogo) document.querySelector('.sidebar-logo').innerHTML = newSidebarLogo.innerHTML;
+                    if (newSidebarBrand) document.querySelector('.sidebar-brand').innerHTML = newSidebarBrand.innerHTML;
+                    if (newSidebarNav) document.querySelector('.sidebar-nav').innerHTML = newSidebarNav.innerHTML;
+                    
+                    // Handle Launcher vs Module Layout
+                    const isLauncher = url.endsWith('/home') || url.includes('launcher'); // Simplified check
+                    
+                    if (isLauncher) {
+                        sidebar.classList.add('collapsed');
+                        mainContent.classList.add('expanded');
+                        if (topbar) topbar.style.display = 'none';
+                    } else {
+                        // Module view
+                        if (window.innerWidth > 1024) {
+                            sidebar.classList.remove('collapsed');
+                            mainContent.classList.remove('expanded');
+                        } else {
+                            // Mobile/Tablet - keep collapsed but ensure main is ml-0
+                            sidebar.classList.add('collapsed');
+                            mainContent.classList.add('expanded'); // Actually ml-0 via CSS media query is better but this works
+                        }
+                        if (topbar) {
+                            topbar.style.display = 'flex';
+                            if (doc.querySelector('.topbar-title')) {
+                                topbar.querySelector('.topbar-title').innerText = doc.querySelector('.topbar-title').innerText;
+                            }
+                        }
                     }
 
                     // Re-execute scripts
@@ -503,8 +542,6 @@
                         Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
                         newScript.appendChild(document.createTextNode(oldScript.innerHTML));
                         document.body.appendChild(newScript);
-                        // Optional: remove them after execution if you want to keep DOM clean
-                        // setTimeout(() => newScript.remove(), 100); 
                     });
 
                     // Re-initialize Feather icons and scripts
@@ -519,7 +556,7 @@
                     // Scroll to top of content
                     window.scrollTo(0, 0);
 
-                    // Re-mark active nav
+                    // Re-mark active nav (already handled by newSidebarNav.innerHTML, but for safety)
                     updateActiveNav(url);
                     
                     pageSkeleton.classList.add('hidden');
