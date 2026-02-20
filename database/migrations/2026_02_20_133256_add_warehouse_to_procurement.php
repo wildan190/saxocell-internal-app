@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('purchase_orders', function (Blueprint $table) {
-            //
+            $table->uuid('warehouse_id')->nullable()->after('supplier_id');
+            $table->foreign('warehouse_id')->references('id')->on('warehouses')->onDelete('set null');
         });
     }
 
@@ -22,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('purchase_orders', function (Blueprint $table) {
-            //
+            $table->dropForeign(['warehouse_id']);
+            $table->dropColumn('warehouse_id');
         });
     }
 };
