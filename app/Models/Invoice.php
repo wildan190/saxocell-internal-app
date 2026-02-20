@@ -16,6 +16,7 @@ class Invoice extends Model
         'invoice_number',
         'purchase_order_id',
         'supplier_id',
+        'warehouse_id',
         'invoice_date',
         'due_date',
         'subtotal',
@@ -47,6 +48,11 @@ class Invoice extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 
     public function items(): HasMany

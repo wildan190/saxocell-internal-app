@@ -57,9 +57,25 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Expected Delivery Date</label>
-                    <input type="date" name="expected_delivery_date" class="form-control" value="{{ old('expected_delivery_date') }}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Target Warehouse (Hub)</label>
+                        <select name="warehouse_id" class="form-select @error('warehouse_id') is-invalid @enderror">
+                            <option value="">N/A (General Procurement)</option>
+                            @foreach($warehouses as $warehouse)
+                                <option value="{{ $warehouse->id }}" {{ old('warehouse_id') == $warehouse->id ? 'selected' : '' }}>
+                                    {{ $warehouse->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-[10px] text-slate-400 mt-1 italic">Associate this order with a specific hub for financial tracking.</p>
+                        @error('warehouse_id') <p class="error-message">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Expected Delivery Date</label>
+                        <input type="date" name="expected_delivery_date" class="form-control" value="{{ old('expected_delivery_date') }}">
+                    </div>
                 </div>
 
                 <!-- Items Board -->

@@ -103,6 +103,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('income', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'storeIncome'])->name('income.store');
         Route::get('transfer', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'createTransfer'])->name('transfer.create');
         Route::post('transfer', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'storeTransfer'])->name('transfer.store');
+        Route::get('pay-supplier', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'paySupplier'])->name('pay-supplier.create');
+        Route::post('pay-supplier', [\App\Http\Controllers\Warehouse\WarehouseFinanceController::class, 'storePayment'])->name('pay-supplier.store');
         Route::post('accounts', [\App\Http\Controllers\WarehouseController::class, 'storeAccount'])->name('accounts.store');
     });
 

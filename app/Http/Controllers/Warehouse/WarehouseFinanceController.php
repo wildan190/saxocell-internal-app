@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Warehouse;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Account;
 use App\Models\JournalEntry;
 use App\Models\JournalItem;
 use App\Models\Store;
 use App\Models\Warehouse;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -143,6 +146,102 @@ class WarehouseFinanceController extends Controller
         } catch (\Exception $e) {
             Log::error('Warehouse Transfer Error: ' . $e->getMessage());
             return back()->with('error', 'Failed to transfer: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    // Supplier Payment
+    public function paySupplier(Warehouse $warehouse)
+    {
+        $warehouse->load('accounts');
+        $invoices = Invoice::where('warehouse_id', $warehouse->id)
+            ->where('payment_status', '!=', 'paid')
+            ->whereIn('status', ['approved', 'matched'])
+            ->with('supplier')
+            ->get();
+            
+        $cashAccounts = $warehouse->accounts()->whereIn('category', ['cash', 'bank'])->get();
+        
+        return view('warehouses.finance.pay_supplier', compact('warehouse', 'invoices', 'cashAccounts'));
+    }
+
+    public function storePayment(Request $request, Warehouse $warehouse)
+    {
+        $validated = $request->validate([
+            'invoice_id' => 'required|exists:invoices,id',
+            'account_id' => 'required|exists:accounts,id',
+            'payment_date' => 'required|date',
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required',
+            'reference_number' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        $invoice = Invoice::where('warehouse_id', $warehouse->id)->findOrFail($validated['invoice_id']);
+        
+        if(!$warehouse->accounts->contains($validated['account_id'])) {
+            return back()->with('error', 'The selected account does not belong to this warehouse.')->withInput();
+        }
+
+        try {
+            DB::transaction(function() use ($validated, $invoice, $warehouse) {
+                $payment = Payment::create([
+                    'invoice_id' => $invoice->id,
+                    'account_id' => $validated['account_id'],
+                    'payment_date' => $validated['payment_date'],
+                    'amount' => $validated['amount'],
+                    'payment_method' => $validated['payment_method'],
+                    'reference_number' => $validated['reference_number'] ?? null,
+                    'notes' => $validated['notes'] ?? null,
+                    'created_by' => auth()->id() ?? User::first()->id,
+                ]);
+
+                // Create Journal Entry
+                // Debit: Accounts Payable (Liability decrease)
+                // Credit: Warehouse Cash/Bank (Asset decrease)
+                $apAccount = Account::where('category', 'payable')->first();
+                $cashAccount = Account::find($validated['account_id']);
+
+                $entry = JournalEntry::create([
+                    'entry_date' => $validated['payment_date'],
+                    'description' => "Warehouse Payment for Invoice #{$invoice->invoice_number}",
+                    'source_type' => 'warehouse_supplier_payment',
+                    'source_id' => $payment->id,
+                    'created_by' => auth()->id(),
+                ]);
+
+                JournalItem::create([
+                    'journal_entry_id' => $entry->id,
+                    'account_id' => $apAccount->id,
+                    'debit' => $validated['amount'],
+                    'credit' => 0,
+                    'description' => $entry->description,
+                ]);
+
+                JournalItem::create([
+                    'journal_entry_id' => $entry->id,
+                    'account_id' => $cashAccount->id,
+                    'debit' => 0,
+                    'credit' => $validated['amount'],
+                    'description' => $entry->description,
+                ]);
+
+                // Update Balances
+                $apAccount->increment('current_balance', -$validated['amount']); // AP is Liability, decrease = debit
+                $cashAccount->decrement('current_balance', $validated['amount']);
+
+                // Update Invoice Status
+                if ($validated['amount'] >= $invoice->total_amount) {
+                    $invoice->payment_status = 'paid';
+                } else {
+                    $invoice->payment_status = 'partial';
+                }
+                $invoice->save();
+            });
+
+            return redirect()->route('warehouses.show', $warehouse)->with('success', 'Supplier payment recorded successfully.');
+        } catch (\Exception $e) {
+            Log::error('Warehouse Supplier Payment Error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to record payment: ' . $e->getMessage())->withInput();
         }
     }
 }
