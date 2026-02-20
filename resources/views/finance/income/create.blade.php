@@ -26,20 +26,6 @@
     </div>
 
     <div class="max-w-4xl mx-auto">
-        <!-- Error Display -->
-        @if ($errors->any())
-            <div class="bg-rose-50 border border-rose-200 text-rose-600 p-4 rounded-xl mb-6 shadow-sm">
-                <div class="flex items-center gap-2 mb-2">
-                    <i data-feather="alert-circle" class="w-4 h-4"></i>
-                    <span class="font-bold">Please correct the following errors:</span>
-                </div>
-                <ul class="list-disc list-inside text-sm space-y-1">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
         <form action="{{ route('finance.income.store') }}" method="POST" id="incomeForm" class="space-y-8">
             @csrf
             @if(request('prefill_type') == 'store' && request('prefill_id'))
