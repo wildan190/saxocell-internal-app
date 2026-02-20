@@ -18,26 +18,6 @@
 @endsection
 
 @section('content')
-@extends('layouts.app')
-
-@section('title', 'Edit Store: ' . $store->name)
-
-@section('breadcrumb')
-<nav class="breadcrumb">
-    <div class="breadcrumb-item">
-        <i data-feather="home"></i>
-        <a href="{{ route('home') }}">Home</a>
-    </div>
-    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
-    <div class="breadcrumb-item">
-        <a href="{{ route('stores.index') }}">Stores</a>
-    </div>
-    <span class="breadcrumb-separator"><i data-feather="chevron-right"></i></span>
-    <div class="breadcrumb-item active">Edit</div>
-</nav>
-@endsection
-
-@section('content')
 <div class="content-wrapper">
     <div class="page-header">
         <div>
