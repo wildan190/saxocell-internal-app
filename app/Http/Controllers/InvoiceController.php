@@ -175,6 +175,11 @@ class InvoiceController extends Controller
             $apAccount = \App\Models\Account::where('category', 'payable')->first();
 
             if (!$inventoryAccount || !$apAccount) {
+                \Illuminate\Support\Facades\Log::error('Invoice Posting Error: Missing system accounts.', [
+                    'inventory' => $inventoryAccount ? 'found' : 'missing',
+                    'payable' => $apAccount ? 'found' : 'missing',
+                    'all_categories' => \App\Models\Account::pluck('category')->toArray()
+                ]);
                 throw new \Exception('System accounts for Inventory or Accounts Payable are not configured. Please check your Chart of Accounts.');
             }
 
