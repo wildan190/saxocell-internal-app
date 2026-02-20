@@ -300,6 +300,39 @@
             <h1 class="topbar-title">@yield('page-title', ($activeModule === 'launcher' ? '' : 'Dashboard'))</h1>
         </header>
 
+        <!-- Global Alerts -->
+        <div class="px-8 mt-6">
+            @if(session('success'))
+                <div class="flex items-center gap-4 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-700 animate-fade-in shadow-sm shadow-emerald-50 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                        <i data-feather="check-circle" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-black text-sm uppercase tracking-wider italic">Success</p>
+                        <p class="text-xs font-bold opacity-80 mt-0.5">{{ session('success') }}</p>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-emerald-400 hover:text-emerald-600 transition-colors p-2">
+                        <i data-feather="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="flex items-center gap-4 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-700 animate-fade-in shadow-sm shadow-rose-50 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0">
+                        <i data-feather="alert-circle" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-black text-sm uppercase tracking-wider italic">Error Encountered</p>
+                        <p class="text-xs font-bold opacity-80 mt-0.5">{{ session('error') }}</p>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-rose-400 hover:text-rose-600 transition-colors p-2">
+                        <i data-feather="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            @endif
+        </div>
+
         @yield('breadcrumb')
 
         <div id="ajaxContent">
