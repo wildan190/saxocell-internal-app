@@ -19,7 +19,8 @@ Route::get('/home', [\App\Http\Controllers\LauncherController::class, 'index'])
 Route::get('/dashboard', function () {
     $needsReviewCount = \App\Models\Product::needsReview()->count();
     $productsNeedingReview = \App\Models\Product::needsReview()->latest()->take(5)->get();
-    return view('home', compact('needsReviewCount', 'productsNeedingReview'));
+    $recentActivities = \App\Models\ActivityLog::with('user')->latest()->take(10)->get();
+    return view('home', compact('needsReviewCount', 'productsNeedingReview', 'recentActivities'));
 })->middleware(['auth'])->name('dashboard');
 
 Route::get('/activity-logs', [\App\Http\Controllers\ActivityLogController::class, 'index'])
