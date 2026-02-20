@@ -22,6 +22,10 @@ Route::get('/dashboard', function () {
     return view('home', compact('needsReviewCount', 'productsNeedingReview'));
 })->middleware(['auth'])->name('dashboard');
 
+Route::get('/activity-logs', [\App\Http\Controllers\ActivityLogController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('activity-logs.index');
+
 // Products Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/products/needs-review', [ProductController::class, 'needsReview'])->name('products.needs-review');

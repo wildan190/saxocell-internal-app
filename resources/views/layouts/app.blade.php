@@ -284,6 +284,17 @@
                     </a>
                 </div>
             @endif
+
+            <!-- Global / System Section -->
+            <div class="mt-auto pt-6">
+                <div class="nav-section-title">System</div>
+                <div class="nav-item">
+                    <a href="{{ route('activity-logs.index') }}" class="nav-link {{ request()->routeIs('activity-logs.index') ? 'active' : '' }}">
+                        <i data-feather="list" class="nav-icon"></i>
+                        Activity Logs
+                    </a>
+                </div>
+            </div>
         </nav>
     </aside>
     @endif

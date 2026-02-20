@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Attendance extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'employee_id', 'date', 'clock_in', 'clock_out', 
@@ -24,5 +25,16 @@ class Attendance extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    protected static function getActivityDescription(\Illuminate\Database\Eloquent\Model $model, string $action): string
+    {
+        if ($action === 'created') {
+            return "Clocked In at " . $model->clock_in->format('H:i');
+        }
+        if ($action === 'updated' && $model->clock_out) {
+            return "Clocked Out at " . $model->clock_out->format('H:i');
+        }
+        return "Attendance record {$action}";
     }
 }
